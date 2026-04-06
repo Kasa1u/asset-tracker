@@ -1,12 +1,30 @@
 <template>
   <n-config-provider :theme-overrides="themeOverrides">
     <n-space vertical size="large" style="padding: 24px">
-      <n-gradient-text type="info" :size="28" style="font-weight: bold">
-        有数 - 个人资产管理
-      </n-gradient-text>
+      <n-space justify="space-between" align="center" style="width: 100%">
+        <n-gradient-text type="info" :size="28" style="font-weight: bold">
+          {{ t("appName") }}
+        </n-gradient-text>
+        <n-button-group>
+          <n-button 
+            quaternary 
+            :type="currentLocale === 'zh' ? 'primary' : 'default'" 
+            @click="currentLocale = 'zh'"
+          >
+            中文
+          </n-button>
+          <n-button 
+            quaternary 
+            :type="currentLocale === 'en' ? 'primary' : 'default'" 
+            @click="currentLocale = 'en'"
+          >
+            English
+          </n-button>
+        </n-button-group>
+      </n-space>
 
       <n-tabs v-model:value="currentTab" type="line" animated>
-        <n-tab-pane name="home" tab="首页">
+        <n-tab-pane name="home" :tab="t('home')">
           <n-space vertical size="large">
             <n-card v-if="expiringWarranties.length > 0 || highPriorityWishlist.length > 0" size="small" style="border-radius: 12px">
               <n-space vertical size="small">
@@ -131,18 +149,18 @@
           </n-space>
         </n-tab-pane>
 
-        <n-tab-pane name="wishlist" tab="心愿清单">
+        <n-tab-pane name="wishlist" :tab="t('wishlist')">
           <n-card size="small">
             <template #header>
               <n-space align="center">
                 <n-icon size="18" :component="ListOutline" />
-                <span>心愿清单</span>
+                <span>{{ t("wishlist") }}</span>
               </n-space>
             </template>
             <template #header-extra>
               <n-button type="primary" size="small" @click="handleAddWishlist">
                 <template #icon><n-icon :component="CreateOutline" /></template>
-                添加心愿
+                {{ t("add") }}
               </n-button>
             </template>
             <n-grid :cols="2" :x-gap="12" :y-gap="12" v-if="wishlist.length > 0">
@@ -162,19 +180,19 @@
                       <span>{{ item.category }}</span>
                     </n-space>
                     <n-space justify="space-between" v-if="item.expected_price">
-                      <span class="label">预期价格:</span>
+                      <span class="label">{{ t("expectedPrice") }}:</span>
                       <span>¥{{ item.expected_price.toFixed(0) }}</span>
                     </n-space>
                     <n-space justify="space-between" v-if="item.remark">
-                      <span class="label">备注:</span>
+                      <span class="label">{{ t("remark") }}:</span>
                       <n-ellipsis style="max-width: 100px">{{ item.remark }}</n-ellipsis>
                     </n-space>
                   </n-space>
                   <template #footer>
                     <n-space justify="end">
-                      <n-button size="small" quaternary @click="handleEditWishlist(item)">编辑</n-button>
+                      <n-button size="small" quaternary @click="handleEditWishlist(item)">{{ t("edit") }}</n-button>
                       <n-button type="success" size="small" quaternary @click="handleBuyWishlist(item)">购入</n-button>
-                      <n-button type="error" size="small" quaternary @click="handleDeleteWishlist(item.id)">删除</n-button>
+                      <n-button type="error" size="small" quaternary @click="handleDeleteWishlist(item.id)">{{ t("delete") }}</n-button>
                     </n-space>
                   </template>
                 </n-card>
@@ -184,12 +202,12 @@
           </n-card>
         </n-tab-pane>
 
-        <n-tab-pane name="timeline" tab="时间轴">
+        <n-tab-pane name="timeline" :tab="t('timeline')">
           <n-card size="small">
             <template #header>
               <n-space align="center">
                 <n-icon size="18" :component="ListOutline" />
-                <span>时间轴</span>
+                <span>{{ t("timeline") }}</span>
               </n-space>
             </template>
             <div style="max-height: 600px; overflow-y: auto; padding: 10px 0">
@@ -223,23 +241,18 @@
           </n-card>
         </n-tab-pane>
 
-        <n-tab-pane name="stats" tab="统计分析">
+        <n-tab-pane name="stats" :tab="t('stats')">
           <n-space vertical size="large">
             <n-card size="small">
               <template #header>
                 <n-space align="center" justify="space-between" style="width: 100%">
                   <n-space align="center">
                     <n-icon size="18" :component="BarChartOutline" />
-                    <span>统计分析</span>
+                    <span>{{ t("stats") }}</span>
                   </n-space>
                   <n-select 
                     v-model:value="chartTimeRange" 
-                    :options="[
-                      { label: '近3个月', value: '3' },
-                      { label: '近6个月', value: '6' },
-                      { label: '近12个月', value: '12' },
-                      { label: '全部', value: 'all' }
-                    ]"
+                    :options="chartRangeOptions"
                     size="small"
                     style="width: 140px"
                   />
@@ -542,6 +555,148 @@ interface WishlistItem {
   created_at?: string;
 }
 
+type Locale = "zh" | "en";
+
+const messages: Record<Locale, any> = {
+  zh: {
+    appName: "有数 - 个人资产管理",
+    home: "首页",
+    wishlist: "心愿清单",
+    timeline: "时间轴",
+    stats: "统计分析",
+    assets: "资产",
+    add: "录入新资产",
+    search: "搜索",
+    sort: "排序方式",
+    totalAssets: "总资产",
+    dailyCost: "日均成本",
+    assetCount: "资产数量",
+    all: "全部",
+    underWarranty: "保障中",
+    active: "活跃中",
+    retired: "已退役",
+    usedUp: "已用完",
+    sold: "已售出",
+    electronics: "电子产品",
+    furniture: "家具家电",
+    clothing: "服装配饰",
+    sports: "运动器材",
+    books: "书籍文具",
+    consumables: "消耗品",
+    other: "其他",
+    reminder: "提醒",
+    warrantyExpiring: "个资产保修即将到期",
+    daysLeft: "天",
+    highPriorityWishlist: "个高优先级心愿",
+    expectedPrice: "预期",
+    sortOptions: {
+      id_desc: "最新添加",
+      id_asc: "最早添加",
+      date_desc: "最新购买",
+      date_asc: "最早购买",
+      price_desc: "价格最高",
+      price_asc: "价格最低",
+      dailyCost_desc: "日均最贵",
+      dailyCost_asc: "日均最便宜"
+    },
+    itemName: "物品名称",
+    category: "分类",
+    buyPrice: "购入价格",
+    buyDate: "购入日期",
+    warrantyDate: "保修截止",
+    remark: "备注",
+    save: "保存",
+    cancel: "取消",
+    edit: "编辑",
+    delete: "删除",
+    sell: "售出",
+    sellPrice: "售出价格",
+    sellDate: "售出日期",
+    assetDetail: "资产详情",
+    holdDays: "持有天数",
+    chartRange: {
+      "3": "近3个月",
+      "6": "近6个月",
+      "12": "近12个月",
+      "all": "全部"
+    }
+  },
+  en: {
+    appName: "Asset Tracker",
+    home: "Home",
+    wishlist: "Wishlist",
+    timeline: "Timeline",
+    stats: "Statistics",
+    assets: "Assets",
+    add: "Add Asset",
+    search: "Search",
+    sort: "Sort by",
+    totalAssets: "Total Assets",
+    dailyCost: "Daily Cost",
+    assetCount: "Asset Count",
+    all: "All",
+    underWarranty: "Under Warranty",
+    active: "Active",
+    retired: "Retired",
+    usedUp: "Used Up",
+    sold: "Sold",
+    electronics: "Electronics",
+    furniture: "Furniture",
+    clothing: "Clothing",
+    sports: "Sports",
+    books: "Books",
+    consumables: "Consumables",
+    other: "Other",
+    reminder: "Reminders",
+    warrantyExpiring: "assets with expiring warranty",
+    daysLeft: "days left",
+    highPriorityWishlist: "high priority wishes",
+    expectedPrice: "Expected",
+    sortOptions: {
+      id_desc: "Latest Added",
+      id_asc: "Earliest Added",
+      date_desc: "Latest Purchased",
+      date_asc: "Earliest Purchased",
+      price_desc: "Highest Price",
+      price_asc: "Lowest Price",
+      dailyCost_desc: "Most Expensive/Day",
+      dailyCost_asc: "Cheapest/Day"
+    },
+    itemName: "Item Name",
+    category: "Category",
+    buyPrice: "Purchase Price",
+    buyDate: "Purchase Date",
+    warrantyDate: "Warranty Expires",
+    remark: "Remark",
+    save: "Save",
+    cancel: "Cancel",
+    edit: "Edit",
+    delete: "Delete",
+    sell: "Sell",
+    sellPrice: "Sell Price",
+    sellDate: "Sell Date",
+    assetDetail: "Asset Detail",
+    holdDays: "Days Held",
+    chartRange: {
+      "3": "Last 3 months",
+      "6": "Last 6 months",
+      "12": "Last 12 months",
+      "all": "All time"
+    }
+  }
+};
+
+const currentLocale = ref<Locale>("zh");
+const t = (key: string) => {
+  const keys = key.split(".");
+  let result: any = messages[currentLocale.value];
+  for (const k of keys) {
+    result = result[k];
+    if (!result) return key;
+  }
+  return result;
+};
+
 import {
   NConfigProvider, NSpace, NCard, NForm, NFormItem, NInput, NInputNumber,
   NButton, NGradientText, NStatistic, NDatePicker, NGrid, NGi, NIcon,
@@ -591,16 +746,23 @@ const statusColorMap: Record<number, string> = {
   4: "#d03050"
 };
 
-const sortOptions = [
-  { label: "最新添加", value: "id_desc" },
-  { label: "最早添加", value: "id_asc" },
-  { label: "最新购买", value: "date_desc" },
-  { label: "最早购买", value: "date_asc" },
-  { label: "价格最高", value: "price_desc" },
-  { label: "价格最低", value: "price_asc" },
-  { label: "日均最贵", value: "dailyCost_desc" },
-  { label: "日均最便宜", value: "dailyCost_asc" }
-];
+const sortOptions = computed(() => [
+  { label: t("sortOptions.id_desc"), value: "id_desc" },
+  { label: t("sortOptions.id_asc"), value: "id_asc" },
+  { label: t("sortOptions.date_desc"), value: "date_desc" },
+  { label: t("sortOptions.date_asc"), value: "date_asc" },
+  { label: t("sortOptions.price_desc"), value: "price_desc" },
+  { label: t("sortOptions.price_asc"), value: "price_asc" },
+  { label: t("sortOptions.dailyCost_desc"), value: "dailyCost_desc" },
+  { label: t("sortOptions.dailyCost_asc"), value: "dailyCost_asc" }
+]);
+
+const chartRangeOptions = computed(() => [
+  { label: t("chartRange.3"), value: "3" },
+  { label: t("chartRange.6"), value: "6" },
+  { label: t("chartRange.12"), value: "12" },
+  { label: t("chartRange.all"), value: "all" }
+]);
 
 const themeOverrides = {
   common: {
