@@ -8,14 +8,44 @@
       <n-tabs v-model:value="currentTab" type="line" animated>
         <n-tab-pane name="home" tab="首页">
           <n-space vertical size="large">
-            <n-card size="small">
+            <n-card v-if="expiringWarranties.length > 0 || highPriorityWishlist.length > 0" size="small" style="border-radius: 12px">
+              <n-space vertical size="small">
+                <n-space align="center">
+                  <n-icon size="18" :component="NotificationsOutline" style="color: #d03050" />
+                  <n-text strong size="large" style="color: #d03050">提醒</n-text>
+                </n-space>
+                <n-space vertical size="small">
+                  <n-alert v-if="expiringWarranties.length > 0" type="warning" :title="`${expiringWarranties.length} 个资产保修即将到期`" style="margin: 0">
+                    <div v-for="item in expiringWarranties" :key="item.id" style="padding: 4px 0">
+                      <n-text strong>{{ item.name }}</n-text> - 还剩 {{ item.daysUntilExpire }} 天
+                    </div>
+                  </n-alert>
+                  <n-alert v-if="highPriorityWishlist.length > 0" type="info" :title="`${highPriorityWishlist.length} 个高优先级心愿`" style="margin: 0">
+                    <div v-for="item in highPriorityWishlist" :key="item.id" style="padding: 4px 0">
+                      <n-text strong>{{ item.name }}</n-text> - 预期 ¥{{ item.expected_price.toFixed(0) }}
+                    </div>
+                  </n-alert>
+                </n-space>
+              </n-space>
+            </n-card>
+            <n-card size="small" style="border-radius: 12px">
               <n-space justify="space-between" align="center">
-                <n-text strong size="large">资产</n-text>
+                <n-space align="center">
+                  <n-icon size="24" :component="WalletOutline" />
+                  <n-text strong size="large">资产</n-text>
+                </n-space>
                 <n-space>
-                  <n-input v-model:value="searchKeyword" placeholder="搜索" clearable style="width: 150px" size="small" />
-                  <n-button circle @click="showAddModal = true">
+                  <n-select 
+                    v-model:value="sortBy" 
+                    :options="sortOptions"
+                    size="small"
+                    style="width: 180px"
+                    placeholder="排序方式"
+                  />
+                  <n-input v-model:value="searchKeyword" placeholder="搜索" clearable style="width: 140px" size="small" />
+                  <n-button circle type="primary" @click="showAddModal = true">
                     <template #icon>
-                      <n-icon size="20">
+                      <n-icon size="18">
                         <AddOutline />
                       </n-icon>
                     </template>
@@ -24,33 +54,36 @@
               </n-space>
             </n-card>
 
-            <n-card size="small" style="border-radius: 16px">
-              <n-text strong size="large" style="color: #666; font-size: 14px">总资产</n-text>
-              <n-text strong size="huge" style="font-size: 36px; font-weight: bold; display: block; margin-top: 8px">
-                ¥{{ filteredTotalInvestment.toFixed(0) }}
-              </n-text>
-              <n-divider style="margin: 16px 0" />
-              <n-space justify="space-between">
-                <div>
-                  <n-text style="color: #999; font-size: 14px">日均成本</n-text>
-                  <n-text strong style="font-size: 20px; display: block">¥{{ filteredDailyAverageCost.toFixed(2) }}</n-text>
-                </div>
-                <div style="text-align: right">
-                  <n-text style="color: #999; font-size: 14px">资产数量</n-text>
-                  <n-text strong style="font-size: 20px; display: block">{{ filteredAssetCount }}/10</n-text>
-                </div>
+            <n-card size="small" style="border-radius: 16px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white">
+              <n-space vertical>
+                <n-text style="color: rgba(255,255,255,0.8); font-size: 14px">总资产</n-text>
+                <n-text strong style="font-size: 40px; font-weight: bold; display: block">
+                  ¥{{ filteredTotalInvestment.toFixed(0) }}
+                </n-text>
+                <n-divider style="margin: 12px 0; border-color: rgba(255,255,255,0.2)" />
+                <n-space justify="space-between">
+                  <div>
+                    <n-text style="color: rgba(255,255,255,0.7); font-size: 13px">日均成本</n-text>
+                    <n-text strong style="font-size: 22px; display: block">¥{{ filteredDailyAverageCost.toFixed(2) }}</n-text>
+                  </div>
+                  <div style="text-align: right">
+                    <n-text style="color: rgba(255,255,255,0.7); font-size: 13px">资产数量</n-text>
+                    <n-text strong style="font-size: 22px; display: block">{{ filteredAssetCount }}/10</n-text>
+                  </div>
+                </n-space>
               </n-space>
             </n-card>
 
-            <n-card size="small">
-              <n-space vertical size="small">
+            <n-card size="small" style="border-radius: 12px">
+              <n-space vertical size="medium">
                 <div style="overflow-x: auto">
-                  <n-space size="small" style="white-space: nowrap">
+                  <n-space size="medium" style="white-space: nowrap">
                     <n-button 
                       v-for="status in ['', '0', '1', '2', '3', '4']" 
                       :key="status"
                       :type="filterStatus === status ? 'primary' : 'default'"
                       quaternary
+                      size="small"
                       @click="filterStatus = status"
                     >
                       {{ status === '' ? '全部' : statusTextMap[Number(status)] }}
@@ -58,12 +91,13 @@
                   </n-space>
                 </div>
                 <div style="overflow-x: auto">
-                  <n-space size="small" style="white-space: nowrap">
+                  <n-space size="medium" style="white-space: nowrap">
                     <n-button 
                       v-for="cat in categoryOptionsWithAll" 
                       :key="cat.value"
                       :type="filterCategory === cat.value ? 'primary' : 'default'"
                       quaternary
+                      size="small"
                       @click="filterCategory = cat.value"
                     >
                       {{ cat.label }}
@@ -193,9 +227,22 @@
           <n-space vertical size="large">
             <n-card size="small">
               <template #header>
-                <n-space align="center">
-                  <n-icon size="18" :component="BarChartOutline" />
-                  <span>统计分析</span>
+                <n-space align="center" justify="space-between" style="width: 100%">
+                  <n-space align="center">
+                    <n-icon size="18" :component="BarChartOutline" />
+                    <span>统计分析</span>
+                  </n-space>
+                  <n-select 
+                    v-model:value="chartTimeRange" 
+                    :options="[
+                      { label: '近3个月', value: '3' },
+                      { label: '近6个月', value: '6' },
+                      { label: '近12个月', value: '12' },
+                      { label: '全部', value: 'all' }
+                    ]"
+                    size="small"
+                    style="width: 140px"
+                  />
                 </n-space>
               </template>
               <n-space vertical size="large">
@@ -241,7 +288,7 @@
                     </n-card>
                   </n-gi>
                   <n-gi :span="24">
-                    <n-card title="整体日均成本趋势（近6个月）" size="small">
+                    <n-card :title="`整体日均成本趋势（近${chartTimeRange === 'all' ? '全部' : chartTimeRange}个月）`" size="small">
                       <div ref="barChartRef" style="height: 300px"></div>
                     </n-card>
                   </n-gi>
@@ -469,13 +516,40 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed, watch, nextTick } from "vue";
+
+interface Asset {
+  id: number;
+  name: string;
+  buy_price: number;
+  buy_date: string;
+  warranty_date: string | null;
+  category: string;
+  status: number;
+  sell_price?: number | null;
+  sell_date?: string | null;
+  remark?: string | null;
+  created_at?: string;
+  dailyCost?: number;
+}
+
+interface WishlistItem {
+  id: number;
+  name: string;
+  category: string;
+  expected_price: number;
+  priority: number;
+  remark?: string | null;
+  created_at?: string;
+}
+
 import {
   NConfigProvider, NSpace, NCard, NForm, NFormItem, NInput, NInputNumber,
   NButton, NGradientText, NStatistic, NDatePicker, NGrid, NGi, NIcon,
   NSelect, NTag, NModal, NDescriptions, NDescriptionsItem, NDivider,
   NEllipsis, NEmpty, NTimeline, NTimelineItem, NText, NTabs, NTabPane, createDiscreteApi,
+  NAlert,
 } from "naive-ui";
-import { BarChartOutline, ListOutline, InformationCircleOutline, CreateOutline, TrashOutline, TrendingUpOutline, AddOutline } from "@vicons/ionicons5";
+import { BarChartOutline, ListOutline, InformationCircleOutline, CreateOutline, TrashOutline, TrendingUpOutline, AddOutline, NotificationsOutline, WalletOutline } from "@vicons/ionicons5";
 import { initDatabase } from "./db";
 import * as echarts from "echarts";
 
@@ -517,9 +591,26 @@ const statusColorMap: Record<number, string> = {
   4: "#d03050"
 };
 
+const sortOptions = [
+  { label: "最新添加", value: "id_desc" },
+  { label: "最早添加", value: "id_asc" },
+  { label: "最新购买", value: "date_desc" },
+  { label: "最早购买", value: "date_asc" },
+  { label: "价格最高", value: "price_desc" },
+  { label: "价格最低", value: "price_asc" },
+  { label: "日均最贵", value: "dailyCost_desc" },
+  { label: "日均最便宜", value: "dailyCost_asc" }
+];
+
+const themeOverrides = {
+  common: {
+    fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+  }
+};
+
 const dbInstance = ref<any>(null);
-const assetList = ref<any[]>([]);
-const wishlist = ref<any[]>([]);
+const assetList = ref<Asset[]>([]);
+const wishlist = ref<WishlistItem[]>([]);
 const totalInvestment = ref(0);
 const assetCount = ref(0);
 const currentTab = ref("home");
@@ -531,12 +622,14 @@ const showWishlistEditModal = ref(false);
 const editingId = ref<number | null>(null);
 const sellingId = ref<number | null>(null);
 const editingWishlistId = ref<number | null>(null);
-const currentAsset = ref<any>(null);
+const currentAsset = ref<Asset | null>(null);
 const searchKeyword = ref("");
 const filterCategory = ref("");
 const filterStatus = ref("");
 const currentTime = ref(new Date());
 const showAddModal = ref(false);
+const sortBy = ref("id_desc");
+const chartTimeRange = ref<"3" | "6" | "12" | "all">("6");
 
 const barChartRef = ref<HTMLElement>();
 const detailChartRef = ref<HTMLElement>();
@@ -632,7 +725,29 @@ const filteredAssetList = computed(() => {
     .map(item => ({
       ...item,
       dailyCost: getDailyCost(item)
-    }));
+    }))
+    .sort((a, b) => {
+      const [field, order] = sortBy.value.split("_");
+      const isDesc = order === "desc";
+      let comparison = 0;
+
+      switch (field) {
+        case "id":
+          comparison = a.id - b.id;
+          break;
+        case "date":
+          comparison = new Date(a.buy_date).getTime() - new Date(b.buy_date).getTime();
+          break;
+        case "price":
+          comparison = a.buy_price - b.buy_price;
+          break;
+        case "dailyCost":
+          comparison = a.dailyCost - b.dailyCost;
+          break;
+      }
+
+      return isDesc ? -comparison : comparison;
+    });
 });
 
 const filteredTotalInvestment = computed(() => {
@@ -667,7 +782,7 @@ const getHoldDays = (item: any) => {
   return Math.max(1, days);
 };
 
-const getDailyCost = (item: any) => {
+const getDailyCost = (item: Asset) => {
   if (!item) return 0;
   const days = getHoldDays(item);
   const sellPrice = item.status === 1 ? (item.sell_price || 0) : 0;
@@ -699,6 +814,35 @@ const getActualStatus = (item: any) => {
   
   return 1;
 };
+
+const getDaysUntilWarrantyExpires = (item: any) => {
+  if (!item.warranty_date) return Infinity;
+  const warrantyDate = new Date(item.warranty_date);
+  const now = currentTime.value;
+  const days = Math.ceil((warrantyDate.getTime() - now.getTime()) / 86400000);
+  return days;
+};
+
+const expiringWarranties = computed(() => {
+  return assetList.value
+    .filter(item => {
+      const actualStatus = getActualStatus(item);
+      if (actualStatus !== 0) return false;
+      const days = getDaysUntilWarrantyExpires(item);
+      return days > 0 && days <= 30;
+    })
+    .map(item => ({
+      ...item,
+      daysUntilExpire: getDaysUntilWarrantyExpires(item)
+    }))
+    .sort((a, b) => a.daysUntilExpire - b.daysUntilExpire);
+});
+
+const highPriorityWishlist = computed(() => {
+  return wishlist.value
+    .filter(item => item.priority >= 2)
+    .sort((a, b) => b.priority - a.priority);
+});
 
 const getActualStatusText = (item: any) => {
   const actualStatus = getActualStatus(item);
@@ -796,9 +940,22 @@ const initCharts = () => {
     const now = currentTime.value;
     const dailyCostData: [string, string][] = [];
     const endDate = new Date(now);
-    endDate.setMonth(endDate.getMonth() - 6);
     
-    for (let d = new Date(endDate); d <= now; d.setDate(d.getDate() + 3)) {
+    if (chartTimeRange.value === "3") {
+      endDate.setMonth(endDate.getMonth() - 3);
+    } else if (chartTimeRange.value === "6") {
+      endDate.setMonth(endDate.getMonth() - 6);
+    } else if (chartTimeRange.value === "12") {
+      endDate.setFullYear(endDate.getFullYear() - 1);
+    } else {
+      const allDates = assetList.value.map(item => new Date(item.buy_date));
+      if (allDates.length > 0) {
+        endDate.setTime(Math.min(...allDates.map(d => d.getTime())));
+      }
+    }
+    
+    const step = chartTimeRange.value === "all" ? 7 : 3;
+    for (let d = new Date(endDate); d <= now; d.setDate(d.getDate() + step)) {
       const dateStr = d.toISOString().split("T")[0];
       const totalCost = assetList.value.reduce((sum, item) => {
         const buyDate = new Date(item.buy_date);
@@ -957,7 +1114,7 @@ const initCharts = () => {
   }
 };
 
-watch([() => assetList.value.length, showDetailModal, currentTime, currentTab], () => {
+watch([() => assetList.value.length, showDetailModal, currentTime, currentTab, chartTimeRange], () => {
   nextTick(() => {
     if (currentTab.value === 'stats') {
       initCharts();
