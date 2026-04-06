@@ -1,7 +1,66 @@
-# Tauri + Vue + TypeScript
+# 资产追踪系统
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+一个基于 Tauri + Vue 3 + TypeScript 开发的桌面资产追踪应用，帮助你管理个人资产和心愿清单。
 
-## Recommended IDE Setup
+## 功能特性
 
-- [VS Code](https://code.visualstudio.com/) + [Vue - Official](https://marketplace.visualstudio.com/items?itemName=Vue.volar) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
+### 资产管理
+- 📦 资产录入与编辑
+- 🏷️ 状态分类（保障中/活跃中/已退役/已用完/已售出）
+- 📊 分类标签（电子产品/家具家电/服装配饰等）
+- 💰 自动计算日均成本、使用天数
+- 🔍 状态与分类筛选联动
+
+### 心愿清单
+- 💭 心愿记录与管理
+- ⭐ 优先级标注
+- 📝 备注与预期价格
+
+### 统计分析
+- 📈 ECharts 数据可视化
+- 📊 总资产分布
+- 📉 日均成本趋势
+- 📋 状态总览
+
+### 时间轴
+- ⏰ 资产购入时间展示
+
+## 技术栈
+
+- **前端框架**: Vue 3 + TypeScript
+- **UI 组件库**: Naive UI
+- **图表库**: ECharts
+- **桌面框架**: Tauri 2
+- **数据库**: SQLite
+- **构建工具**: Vite
+
+## 开发指南
+
+### 环境要求
+- Node.js >= 18
+- Rust >= 1.70
+
+### 安装依赖
+```bash
+npm install
+```
+
+### 启动开发服务器
+```bash
+npm run tauri dev
+```
+
+### 构建生产版本
+```bash
+npm run tauri build
+```
+
+## 项目结构
+
+```
+src/
+├── App.vue          # 主应用组件
+├── db.ts            # 数据库操作
+├── main.ts          # 入口文件
+└── assets/          # 静态资源
+```
