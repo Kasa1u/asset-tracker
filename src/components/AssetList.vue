@@ -193,6 +193,10 @@
 import { computed } from 'vue';
 import { useAssetStore } from '../stores/assetStore';
 import { HomeOutline, CreateOutline, AlertCircleOutline, StarOutline, WalletOutline, BarChartOutline } from '@vicons/ionicons5';
+import {
+  NCard, NSpace, NIcon, NSelect, NButton, NTag, NList, NListItem, 
+  NAvatar, NGrid, NGi, NText, NDivider, NEmpty
+} from "naive-ui";
 
 const store = useAssetStore();
 

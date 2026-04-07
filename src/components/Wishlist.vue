@@ -54,6 +54,10 @@
 <script setup lang="ts">
 import { useAssetStore } from '../stores/assetStore';
 import { ListOutline, CreateOutline } from '@vicons/ionicons5';
+import {
+  NCard, NSpace, NIcon, NButton, NTag, NGrid, NGi, 
+  NText, NEmpty, NEllipsis
+} from "naive-ui";
 
 const store = useAssetStore();
 

@@ -81,6 +81,10 @@ import { ref, onMounted, watch, nextTick } from 'vue';
 import { useAssetStore } from '../stores/assetStore';
 import { BarChartOutline, EllipseOutline } from '@vicons/ionicons5';
 import * as echarts from 'echarts';
+import {
+  NCard, NSpace, NIcon, NSelect, NGrid, NGi, 
+  NStatistic
+} from "naive-ui";
 
 const store = useAssetStore();
 

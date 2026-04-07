@@ -41,6 +41,10 @@
 import { computed } from 'vue';
 import { useAssetStore } from '../stores/assetStore';
 import { ListOutline } from '@vicons/ionicons5';
+import {
+  NCard, NSpace, NIcon, NTimeline, NTimelineItem, 
+  NText, NTag, NEmpty
+} from "naive-ui";
 
 const store = useAssetStore();
 
