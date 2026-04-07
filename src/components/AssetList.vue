@@ -88,38 +88,36 @@
       </n-space>
     </n-card>
 
-    <n-card size="small" style="border-radius: 12px">
-      <n-space vertical size="medium">
-        <div style="overflow-x: auto">
-          <n-space size="medium" style="white-space: nowrap">
-            <n-button 
-              v-for="status in ['', '0', '1', '2', '3', '4']" 
-              :key="status"
-              :type="store.filterStatus === status ? 'primary' : 'default'"
-              quaternary
-              size="small"
-              @click="store.filterStatus = status"
-            >
-              {{ status === '' ? store.t('all') : statusTextMap[Number(status)] }}
-            </n-button>
-          </n-space>
-        </div>
-        <div style="overflow-x: auto">
-          <n-space size="medium" style="white-space: nowrap">
-            <n-button 
-              v-for="cat in categoryOptionsWithAll" 
-              :key="cat.value"
-              :type="store.filterCategory === cat.value ? 'primary' : 'default'"
-              quaternary
-              size="small"
-              @click="store.filterCategory = cat.value"
-            >
-              {{ cat.label }}
-            </n-button>
-          </n-space>
-        </div>
-      </n-space>
-    </n-card>
+    <n-space vertical size="medium">
+      <div style="overflow-x: auto">
+        <n-space size="medium" style="white-space: nowrap">
+          <n-button 
+            v-for="status in ['', '0', '1', '2', '3', '4']" 
+            :key="status"
+            :type="store.filterStatus === status ? 'primary' : 'default'"
+            quaternary
+            size="small"
+            @click="store.filterStatus = status"
+          >
+            {{ status === '' ? store.t('all') : statusTextMap[Number(status)] }}
+          </n-button>
+        </n-space>
+      </div>
+      <div style="overflow-x: auto">
+        <n-space size="medium" style="white-space: nowrap">
+          <n-button 
+            v-for="cat in categoryOptionsWithAll" 
+            :key="cat.value"
+            :type="store.filterCategory === cat.value ? 'primary' : 'default'"
+            quaternary
+            size="small"
+            @click="store.filterCategory = cat.value"
+          >
+            {{ cat.label }}
+          </n-button>
+        </n-space>
+      </div>
+    </n-space>
 
     <n-grid :cols="2" :x-gap="12" :y-gap="12">
       <n-gi v-for="item in filteredAssetList" :key="item.id">
@@ -181,17 +179,17 @@ const filteredAssetList = computed(() => {
         return b.id - a.id;
       case 'id_asc':
         return a.id - b.id;
-      case 'buy_date_desc':
+      case 'date_desc':
         return new Date(b.buy_date).getTime() - new Date(a.buy_date).getTime();
-      case 'buy_date_asc':
+      case 'date_asc':
         return new Date(a.buy_date).getTime() - new Date(b.buy_date).getTime();
       case 'price_desc':
         return b.buy_price - a.buy_price;
       case 'price_asc':
         return a.buy_price - b.buy_price;
-      case 'daily_cost_desc':
+      case 'dailyCost_desc':
         return getDailyCost(b) - getDailyCost(a);
-      case 'daily_cost_asc':
+      case 'dailyCost_asc':
         return getDailyCost(a) - getDailyCost(b);
       default:
         return 0;
