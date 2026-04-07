@@ -257,7 +257,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed, nextTick } from "vue";
+import { ref, onMounted, nextTick } from "vue";
 import { useAssetStore } from "./stores/assetStore";
 import type { Asset } from "./types";
 

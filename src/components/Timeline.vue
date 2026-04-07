@@ -60,11 +60,18 @@ const timelineData = computed(() => {
   });
 });
 
-const getTimelineType = (item: any) => {
-  return ['success', 'primary', 'warning', 'error', 'default'][item.status];
+const getTimelineType = (item: any): "default" | "success" | "error" | "warning" | "info" => {
+  const typeMap: Record<number, "default" | "success" | "error" | "warning" | "info"> = {
+    0: 'success',
+    1: 'primary',
+    2: 'warning',
+    3: 'error',
+    4: 'default'
+  };
+  return typeMap[item.status] || 'default';
 };
 
-const getActualStatusType = (item: any) => {
+const getActualStatusType = (item: any): "primary" | "default" | "success" | "error" | "warning" | "info" | undefined => {
   if (item.warranty_date) {
     const warrantyEnd = new Date(item.warranty_date);
     const today = new Date();
@@ -72,11 +79,18 @@ const getActualStatusType = (item: any) => {
       return 'success';
     }
   }
-  return ['success', 'primary', 'warning', 'error', 'default'][item.status];
+  const typeMap: Record<number, "primary" | "default" | "success" | "error" | "warning" | "info"> = {
+    0: 'success',
+    1: 'primary',
+    2: 'warning',
+    3: 'error',
+    4: 'default'
+  };
+  return typeMap[item.status] || 'default';
 };
 
 const getActualStatusText = (item: any) => {
-  const statusTextMap = {
+  const statusTextMap: Record<number, string> = {
     0: '保障中',
     1: '活跃中',
     2: '已退役',
@@ -90,7 +104,7 @@ const getActualStatusText = (item: any) => {
       return '保障中';
     }
   }
-  return statusTextMap[item.status];
+  return statusTextMap[item.status as number] || '未知';
 };
 
 const showDetail = (item: any) => {

@@ -1,7 +1,7 @@
 <template>
   <n-space vertical size="large">
     <!-- 总资产卡片 -->
-    <n-card size="small" style="border-radius: 16px; background: linear-gradient(135deg, #18a058 0%, #13c2c2 100%); color: white; box-shadow: 0 8px 32px rgba(24, 160, 88, 0.3);">
+    <n-card size="small" style="border-radius: 16px; background: linear-gradient(135deg, #2080f0 0%, #409eff 100%); color: white; box-shadow: 0 8px 32px rgba(32, 128, 240, 0.3);">
       <template #header>
         <n-space align="center" justify="space-between" style="width: 100%">
           <n-space align="center">
@@ -18,28 +18,27 @@
               :placeholder="store.t('sort')"
             />
             <!-- 添加资产按钮 -->
-            <n-button type="primary" size="small" @click="store.showAddModal = true" style="background: white; color: #18a058">
+            <n-button type="primary" size="small" @click="store.showAddModal = true" style="background: white; color: #2080f0">
               <template #icon><n-icon :component="CreateOutline" /></template>
               {{ store.t('add') }}
             </n-button>
           </n-space>
         </n-space>
       </template>
-      <n-space vertical align="center" justify="center" style="padding: 30px 0">
-        <n-text style="font-size: 16px; opacity: 0.9">{{ store.t('totalInvestment') }}</n-text>
-        <n-text strong style="font-size: 40px; font-weight: bold; margin: 8px 0">¥{{ store.totalInvestment.toFixed(2) }}</n-text>
-        <n-divider style="margin: 20px 0; width: 80%; border-color: rgba(255,255,255,0.3)" />
-        <n-grid :cols="2" :x-gap="40" style="width: 80%">
+      <n-space vertical align="center" justify="center" style="padding: 20px 0">
+        <n-text style="font-size: 16px; opacity: 0.9">{{ store.t('totalAssets') }}</n-text>
+        <n-text strong style="font-size: 36px; font-weight: bold; margin: 8px 0">¥{{ store.totalInvestment.toFixed(2) }}</n-text>
+        <n-grid :cols="2" :x-gap="60" style="width: 90%; margin-top: 16px">
           <n-gi>
-            <n-space vertical align="center">
-              <n-text style="color: rgba(255,255,255,0.8); font-size: 14px">{{ store.t('dailyCost') }}</n-text>
-              <n-text strong style="font-size: 24px; font-weight: bold">¥{{ filteredDailyAverageCost.toFixed(2) }}</n-text>
+            <n-space align="center">
+              <n-text style="color: rgba(255,255,255,0.8); font-size: 14px; margin-right: 8px">{{ store.t('dailyCost') }}:</n-text>
+              <n-text strong style="font-size: 18px; font-weight: bold">¥{{ filteredDailyAverageCost.toFixed(2) }}</n-text>
             </n-space>
           </n-gi>
           <n-gi>
-            <n-space vertical align="center">
-              <n-text style="color: rgba(255,255,255,0.8); font-size: 14px">{{ store.t('assetCount') }}</n-text>
-              <n-text strong style="font-size: 24px; font-weight: bold">{{ filteredAssetCount }}/10</n-text>
+            <n-space align="center">
+              <n-text style="color: rgba(255,255,255,0.8); font-size: 14px; margin-right: 8px">{{ store.t('assetCount') }}:</n-text>
+              <n-text strong style="font-size: 18px; font-weight: bold">{{ filteredAssetCount }}/10</n-text>
             </n-space>
           </n-gi>
         </n-grid>
@@ -276,7 +275,7 @@ const getDailyCost = (item: any): number => {
   return (item.buy_price - sellPrice) / days;
 };
 
-const getActualStatusType = (item: any) => {
+const getActualStatusType = (item: any): "primary" | "default" | "success" | "error" | "warning" | "info" | undefined => {
   if (item.warranty_date) {
     const warrantyEnd = new Date(item.warranty_date);
     const today = new Date();
@@ -284,7 +283,14 @@ const getActualStatusType = (item: any) => {
       return 'success';
     }
   }
-  return ['success', 'primary', 'warning', 'error', 'default'][item.status];
+  const typeMap: Record<number, "primary" | "default" | "success" | "error" | "warning" | "info"> = {
+    0: 'success',
+    1: 'primary',
+    2: 'warning',
+    3: 'error',
+    4: 'default'
+  };
+  return typeMap[item.status] || 'default';
 };
 
 const getActualStatusText = (item: any) => {
@@ -295,7 +301,7 @@ const getActualStatusText = (item: any) => {
       return '保障中';
     }
   }
-  return statusTextMap[item.status];
+  return statusTextMap[item.status as number] || '未知';
 };
 
 const getStatusTagStyle = (item: any) => {
@@ -306,14 +312,14 @@ const getStatusTagStyle = (item: any) => {
       return { background: '#52c41a', borderColor: '#52c41a' };
     }
   }
-  const statusColors = {
+  const statusColors: Record<number, { background: string; borderColor: string }> = {
     0: { background: '#52c41a', borderColor: '#52c41a' },
     1: { background: '#1890ff', borderColor: '#1890ff' },
     2: { background: '#faad14', borderColor: '#faad14' },
     3: { background: '#f5222d', borderColor: '#f5222d' },
     4: { background: '#8c8c8c', borderColor: '#8c8c8c' }
   };
-  return statusColors[item.status] || {};
+  return statusColors[item.status as number] || {};
 };
 
 const showDetail = (item: any) => {
