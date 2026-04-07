@@ -19,7 +19,7 @@
         <n-gi v-for="status in [0, 1, 2, 3, 4]" :key="status">
           <n-statistic :label="statusTextMap[status]" size="small">
             <template #prefix>
-              <n-icon :component="CircleFilled" :style="{ color: statusColorMap[status] }" size="12" />
+              <n-icon :component="EllipseOutline" :style="{ color: statusColorMap[status] }" size="12" />
             </template>
             <template #suffix>
               <span style="font-size: 12px; color: #999">
@@ -79,7 +79,7 @@
 <script setup lang="ts">
 import { ref, onMounted, watch, nextTick } from 'vue';
 import { useAssetStore } from '../stores/assetStore';
-import { BarChartOutline, CircleFilled } from '@vicons/ionicons5';
+import { BarChartOutline, EllipseOutline } from '@vicons/ionicons5';
 import * as echarts from 'echarts';
 
 const store = useAssetStore();

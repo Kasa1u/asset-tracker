@@ -76,8 +76,8 @@
               <n-descriptions-item label="卖出价格">¥{{ store.currentAsset?.sell_price?.toFixed(2) }}</n-descriptions-item>
               <n-descriptions-item label="卖出日期">{{ store.currentAsset?.sell_date }}</n-descriptions-item>
               <n-descriptions-item label="收益">
-                <span :style="{ color: ((store.currentAsset?.sell_price || 0) - store.currentAsset?.buy_price!) >= 0 ? '#18a058' : '#d03050' }">
-                  {{ ((store.currentAsset?.sell_price || 0) - store.currentAsset?.buy_price!) >= 0 ? '+' : '' }}¥{{ ((store.currentAsset?.sell_price || 0) - store.currentAsset?.buy_price!).toFixed(2) }}
+                <span :style="{ color: ((store.currentAsset?.sell_price || 0) - (store.currentAsset?.buy_price || 0)) >= 0 ? '#18a058' : '#d03050' }">
+                  {{ ((store.currentAsset?.sell_price || 0) - (store.currentAsset?.buy_price || 0)) >= 0 ? '+' : '' }}¥{{ ((store.currentAsset?.sell_price || 0) - (store.currentAsset?.buy_price || 0)).toFixed(2) }}
                 </span>
               </n-descriptions-item>
             </n-descriptions>
@@ -576,9 +576,7 @@ const refreshData = async () => {
   store.assetCount = stats[0].count || 0;
   store.totalInvestment = stats[0].total || 0;
   nextTick(() => {
-    if (store.currentTab === 'stats') {
-      initCharts();
-    }
+    // Charts component will handle its own initialization
   });
 };
 
