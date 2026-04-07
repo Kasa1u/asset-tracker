@@ -500,7 +500,7 @@ const initDetailChart = () => {
   }
   
   // 生成2的幂次序列作为横坐标刻度
-  const xAxisTicks = [];
+  const xAxisTicks: number[] = [];
   for (let power = 0; Math.pow(2, power) <= maxDays; power++) {
     xAxisTicks.push(Math.pow(2, power));
   }
