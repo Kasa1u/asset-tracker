@@ -80,7 +80,7 @@
 
           <n-divider style="margin: 14px 0" />
           <div class="action-row">
-            <n-button size="small" type="primary" @click="handleEdit(store.currentAsset)" :disabled="store.currentAsset?.status === 1">
+            <n-button size="small" type="primary" @click="handleEdit(store.currentAsset)">
               <template #icon><n-icon :component="CreateOutline" /></template>编辑
             </n-button>
             <n-button size="small" type="error" ghost @click="handleDelete(store.currentAsset?.id)">
@@ -485,47 +485,60 @@ const initDetailChart = () => {
   const data = [];
   const maxDays = totalDays;
   
-  // 生成2的幂次序列 + 最后一天作为数据点
-  const categories: string[] = [];
-  for (let power = 0; Math.pow(2, power) <= maxDays; power++) {
-    const day = Math.pow(2, power);
-    categories.push(day.toString());
+  // 生成完整的每日数据
+  for (let day = 1; day <= maxDays; day++) {
     const dailyCost = asset.buy_price / day;
-    data.push(dailyCost);
+    data.push([day, dailyCost]);
   }
   
-  // 如果最后一天不是2的幂次，添加最后一天
+  // 生成2的幂次序列 + 最后一天作为刻度标签
+  const xAxisTicks: number[] = [];
+  for (let power = 0; Math.pow(2, power) <= maxDays; power++) {
+    xAxisTicks.push(Math.pow(2, power));
+  }
   const lastPowerDay = Math.pow(2, Math.floor(Math.log2(maxDays)));
   if (lastPowerDay !== maxDays) {
-    categories.push(maxDays.toString());
-    const dailyCost = asset.buy_price / maxDays;
-    data.push(dailyCost);
+    xAxisTicks.push(maxDays);
   }
   
   const option = {
     grid: {
       top: 40,
       right: 20,
-      bottom: 50,
+      bottom: 80,
       left: 60
     },
     tooltip: {
       trigger: 'axis',
       formatter: (params: any) => {
-        const index = params[0].dataIndex;
-        const day = parseInt(categories[index]);
-        const cost = params[0].value;
+        const day = params[0].value[0];
+        const cost = params[0].value[1];
         return `第 ${day} 天<br/>日均成本: ¥${cost.toFixed(2)}`;
       }
     },
+    dataZoom: [
+      {
+        type: 'slider',
+        show: true,
+        xAxisIndex: [0],
+        start: 0,
+        end: 100,
+        height: 25,
+        bottom: 10
+      }
+    ],
     xAxis: {
-      type: 'category',
+      type: 'value',
       name: '持有天数',
       nameLocation: 'middle',
       nameGap: 30,
-      data: categories,
       axisLabel: {
-        interval: 0
+        formatter: (value: number) => {
+          if (xAxisTicks.includes(value)) {
+            return value.toString();
+          }
+          return '';
+        }
       }
     },
     yAxis: {
