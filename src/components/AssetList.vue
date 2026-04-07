@@ -1,12 +1,11 @@
 <template>
   <n-space vertical size="large">
     <!-- 总资产卡片 -->
-    <n-card size="small" style="border-radius: 16px; background: linear-gradient(135deg, #2080f0 0%, #409eff 100%); color: white; box-shadow: 0 8px 32px rgba(32, 128, 240, 0.3);">
+    <n-card size="small" style="border-radius: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.1);">
       <template #header>
         <n-space align="center" justify="space-between" style="width: 100%">
           <n-space align="center">
             <n-icon size="20" :component="HomeOutline" />
-            <span style="font-size: 18px; font-weight: bold">{{ store.t('totalAssets') }}</span>
           </n-space>
           <n-space>
             <!-- 搜索框 -->
@@ -14,7 +13,7 @@
               v-model:value="store.searchKeyword"
               size="small"
               placeholder="搜索资产"
-              style="width: 200px; background: rgba(255,255,255,0.2); border: none; color: white"
+              style="width: 200px"
             >
               <template #prefix>
                 <n-icon size="16" :component="SearchOutline" />
@@ -22,7 +21,7 @@
             </n-input>
             <!-- 排序按钮 -->
             <n-dropdown trigger="click">
-              <n-button circle size="small" style="background: rgba(255,255,255,0.2); border: none; color: white">
+              <n-button circle size="small">
                 <n-icon :component="SwapVerticalOutline" />
               </n-button>
               <template #menu>
@@ -34,7 +33,7 @@
               </template>
             </n-dropdown>
             <!-- 添加资产按钮 -->
-            <n-button circle type="primary" size="small" @click="store.showAddModal = true" style="background: white; color: #2080f0">
+            <n-button circle type="primary" size="small" @click="store.showAddModal = true">
               <n-icon :component="AddOutline" />
             </n-button>
           </n-space>
@@ -46,13 +45,13 @@
         <n-grid :cols="2" :x-gap="60" style="width: 90%; margin-top: 16px">
           <n-gi>
             <n-space align="center">
-              <n-text style="color: rgba(255,255,255,0.8); font-size: 14px; margin-right: 8px">{{ store.t('dailyCost') }}:</n-text>
+              <n-text style="color: #666; font-size: 14px; margin-right: 8px">{{ store.t('dailyCost') }}:</n-text>
               <n-text strong style="font-size: 18px; font-weight: bold">¥{{ filteredDailyAverageCost.toFixed(2) }}</n-text>
             </n-space>
           </n-gi>
           <n-gi>
             <n-space align="center">
-              <n-text style="color: rgba(255,255,255,0.8); font-size: 14px; margin-right: 8px">{{ store.t('assetCount') }}:</n-text>
+              <n-text style="color: #666; font-size: 14px; margin-right: 8px">{{ store.t('assetCount') }}:</n-text>
               <n-text strong style="font-size: 18px; font-weight: bold">{{ filteredAssetCount }}/10</n-text>
             </n-space>
           </n-gi>
@@ -130,7 +129,6 @@
                 v-for="status in ['', '0', '1', '2', '3', '4']" 
                 :key="status"
                 :type="store.filterStatus === status ? 'primary' : 'default'"
-                :style="store.filterStatus === status ? { background: '#2080f0', borderColor: '#2080f0', color: 'white' } : {}"
                 quaternary
                 size="small"
                 @click="store.filterStatus = status"
@@ -150,7 +148,6 @@
                 v-for="cat in categoryOptionsWithAll" 
                 :key="cat.value"
                 :type="store.filterCategory === cat.value ? 'primary' : 'default'"
-                :style="store.filterCategory === cat.value ? { background: '#2080f0', borderColor: '#2080f0', color: 'white' } : {}"
                 quaternary
                 size="small"
                 @click="store.filterCategory = cat.value"
@@ -229,10 +226,12 @@ const statusTextMap: Record<number, string> = {
 };
 
 const categoryOptionsWithAll = computed(() => {
-  const categories = Array.from(new Set(store.assetList.map(item => item.category)));
+  const defaultCategories = ['电子产品', '家具家电', '服装配饰', '运动器材', '书籍文具', '消耗品', '其他'];
+  const assetCategories = Array.from(new Set(store.assetList.map(item => item.category).filter(Boolean)));
+  const allCategories = [...new Set([...defaultCategories, ...assetCategories])];
   return [
     { label: '全部', value: '' },
-    ...categories.map(cat => ({ label: cat, value: cat }))
+    ...allCategories.map(cat => ({ label: cat, value: cat }))
   ];
 });
 
