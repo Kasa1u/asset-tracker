@@ -1,13 +1,15 @@
 <template>
   <n-space vertical size="large">
-    <n-card size="small" style="border-radius: 12px; background: linear-gradient(135deg, #18a058 0%, #13c2c2 100%); color: white;">
+    <!-- 总资产卡片 -->
+    <n-card size="small" style="border-radius: 16px; background: linear-gradient(135deg, #18a058 0%, #13c2c2 100%); color: white; box-shadow: 0 8px 32px rgba(24, 160, 88, 0.3);">
       <template #header>
         <n-space align="center" justify="space-between" style="width: 100%">
           <n-space align="center">
-            <n-icon size="18" :component="HomeOutline" />
-            <span>{{ store.t('home') }}</span>
+            <n-icon size="20" :component="HomeOutline" />
+            <span style="font-size: 18px; font-weight: bold">{{ store.t('home') }}</span>
           </n-space>
           <n-space>
+            <!-- 排序按钮 -->
             <n-select 
               v-model:value="store.sortBy" 
               :options="store.sortOptions"
@@ -15,45 +17,52 @@
               style="width: 180px; background: rgba(255,255,255,0.2); border: none; color: white"
               :placeholder="store.t('sort')"
             />
-            <n-button type="primary" size="small" @click="store.showAddModal = true">
+            <!-- 添加资产按钮 -->
+            <n-button type="primary" size="small" @click="store.showAddModal = true" style="background: white; color: #18a058">
               <template #icon><n-icon :component="CreateOutline" /></template>
               {{ store.t('add') }}
             </n-button>
           </n-space>
         </n-space>
       </template>
-      <n-space vertical align="center" justify="center" style="padding: 20px 0">
-        <n-text style="font-size: 14px; opacity: 0.8">{{ store.t('totalInvestment') }}</n-text>
-        <n-text strong style="font-size: 32px; font-weight: bold">¥{{ store.totalInvestment.toFixed(2) }}</n-text>
-        <n-divider style="margin: 12px 0; border-color: rgba(255,255,255,0.2)" />
-        <n-space justify="space-between">
-          <div>
-            <n-text style="color: rgba(255,255,255,0.7); font-size: 13px">{{ store.t('dailyCost') }}</n-text>
-            <n-text strong style="font-size: 22px; display: block">¥{{ filteredDailyAverageCost.toFixed(2) }}</n-text>
-          </div>
-          <div style="text-align: right">
-            <n-text style="color: rgba(255,255,255,0.7); font-size: 13px">{{ store.t('assetCount') }}</n-text>
-            <n-text strong style="font-size: 22px; display: block">{{ filteredAssetCount }}/10</n-text>
-          </div>
-        </n-space>
+      <n-space vertical align="center" justify="center" style="padding: 30px 0">
+        <n-text style="font-size: 16px; opacity: 0.9">{{ store.t('totalInvestment') }}</n-text>
+        <n-text strong style="font-size: 40px; font-weight: bold; margin: 8px 0">¥{{ store.totalInvestment.toFixed(2) }}</n-text>
+        <n-divider style="margin: 20px 0; width: 80%; border-color: rgba(255,255,255,0.3)" />
+        <n-grid :cols="2" :x-gap="40" style="width: 80%">
+          <n-gi>
+            <n-space vertical align="center">
+              <n-text style="color: rgba(255,255,255,0.8); font-size: 14px">{{ store.t('dailyCost') }}</n-text>
+              <n-text strong style="font-size: 24px; font-weight: bold">¥{{ filteredDailyAverageCost.toFixed(2) }}</n-text>
+            </n-space>
+          </n-gi>
+          <n-gi>
+            <n-space vertical align="center">
+              <n-text style="color: rgba(255,255,255,0.8); font-size: 14px">{{ store.t('assetCount') }}</n-text>
+              <n-text strong style="font-size: 24px; font-weight: bold">{{ filteredAssetCount }}/10</n-text>
+            </n-space>
+          </n-gi>
+        </n-grid>
       </n-space>
     </n-card>
 
-    <n-card size="small" style="border-radius: 12px" v-if="expiringWarranties.length > 0 || highPriorityWishlist.length > 0">
+    <!-- 提醒卡片 -->
+    <n-card size="small" style="border-radius: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.1);" v-if="expiringWarranties.length > 0 || highPriorityWishlist.length > 0">
       <template #header>
         <n-space align="center">
           <n-icon size="18" :component="AlertCircleOutline" />
-          <span>提醒</span>
+          <span style="font-size: 16px; font-weight: bold">提醒</span>
         </n-space>
       </template>
-      <n-space vertical>
+      <n-space vertical size="medium">
+        <!-- 保修到期提醒 -->
         <div v-if="expiringWarranties.length > 0">
           <n-tag type="warning" size="small">保修到期提醒</n-tag>
-          <n-list bordered style="margin-top: 8px">
+          <n-list bordered style="margin-top: 12px; border-radius: 8px; overflow: hidden">
             <n-list-item v-for="item in expiringWarranties" :key="item.id" class="reminder-item">
               <n-space>
-                <n-avatar round>
-                  <n-icon :component="AlertCircleOutline" />
+                <n-avatar round style="background: #fff1f0; color: #ff4d4f">
+                  <n-icon :component="AlertCircleOutline" size="16" />
                 </n-avatar>
                 <div class="reminder-content">
                   <div class="reminder-title">{{ item.name }}</div>
@@ -66,13 +75,14 @@
             </n-list-item>
           </n-list>
         </div>
-        <div v-if="highPriorityWishlist.length > 0" style="margin-top: 16px">
+        <!-- 高优先级心愿提醒 -->
+        <div v-if="highPriorityWishlist.length > 0" style="margin-top: 20px">
           <n-tag type="info" size="small">高优先级心愿</n-tag>
-          <n-list bordered style="margin-top: 8px">
+          <n-list bordered style="margin-top: 12px; border-radius: 8px; overflow: hidden">
             <n-list-item v-for="item in highPriorityWishlist" :key="item.id" class="reminder-item">
               <n-space>
-                <n-avatar round>
-                  <n-icon :component="StarOutline" />
+                <n-avatar round style="background: #e6f7ff; color: #1890ff">
+                  <n-icon :component="StarOutline" size="16" />
                 </n-avatar>
                 <div class="reminder-content">
                   <div class="reminder-title">{{ item.name }}</div>
@@ -88,65 +98,101 @@
       </n-space>
     </n-card>
 
-    <n-space vertical size="medium">
-      <div style="overflow-x: auto">
-        <n-space size="medium" style="white-space: nowrap">
-          <n-button 
-            v-for="status in ['', '0', '1', '2', '3', '4']" 
-            :key="status"
-            :type="store.filterStatus === status ? 'primary' : 'default'"
-            quaternary
-            size="small"
-            @click="store.filterStatus = status"
-          >
-            {{ status === '' ? store.t('all') : statusTextMap[Number(status)] }}
-          </n-button>
+    <!-- 筛选按钮卡片 -->
+    <n-card size="small" style="border-radius: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.1);">
+      <template #header>
+        <n-space align="center">
+          <n-icon size="18" :component="WalletOutline" />
+          <span style="font-size: 16px; font-weight: bold">资产筛选</span>
         </n-space>
-      </div>
-      <div style="overflow-x: auto">
-        <n-space size="medium" style="white-space: nowrap">
-          <n-button 
-            v-for="cat in categoryOptionsWithAll" 
-            :key="cat.value"
-            :type="store.filterCategory === cat.value ? 'primary' : 'default'"
-            quaternary
-            size="small"
-            @click="store.filterCategory = cat.value"
-          >
-            {{ cat.label }}
-          </n-button>
-        </n-space>
-      </div>
-    </n-space>
+      </template>
+      <n-space vertical size="medium">
+        <!-- 状态筛选 -->
+        <div>
+          <n-text style="font-size: 14px; color: #666; margin-bottom: 8px; display: block">状态</n-text>
+          <div style="overflow-x: auto">
+            <n-space size="medium" style="white-space: nowrap">
+              <n-button 
+                v-for="status in ['', '0', '1', '2', '3', '4']" 
+                :key="status"
+                :type="store.filterStatus === status ? 'primary' : 'default'"
+                :style="store.filterStatus === status ? { background: '#18a058', borderColor: '#18a058' } : {}"
+                quaternary
+                size="small"
+                @click="store.filterStatus = status"
+                class="filter-button"
+              >
+                {{ status === '' ? store.t('all') : statusTextMap[Number(status)] }}
+              </n-button>
+            </n-space>
+          </div>
+        </div>
+        <!-- 分类筛选 -->
+        <div style="margin-top: 12px">
+          <n-text style="font-size: 14px; color: #666; margin-bottom: 8px; display: block">分类</n-text>
+          <div style="overflow-x: auto">
+            <n-space size="medium" style="white-space: nowrap">
+              <n-button 
+                v-for="cat in categoryOptionsWithAll" 
+                :key="cat.value"
+                :type="store.filterCategory === cat.value ? 'primary' : 'default'"
+                :style="store.filterCategory === cat.value ? { background: '#18a058', borderColor: '#18a058' } : {}"
+                quaternary
+                size="small"
+                @click="store.filterCategory = cat.value"
+                class="filter-button"
+              >
+                {{ cat.label }}
+              </n-button>
+            </n-space>
+          </div>
+        </div>
+      </n-space>
+    </n-card>
 
-    <n-grid :cols="2" :x-gap="12" :y-gap="12">
-      <n-gi v-for="item in filteredAssetList" :key="item.id">
-        <n-card hoverable size="small" class="asset-card" @click="showDetail(item)" style="border-radius: 12px">
-          <n-space vertical size="small">
-            <div style="text-align: right">
-              <n-tag :type="getActualStatusType(item)" size="small">
-                {{ getActualStatusText(item) }}
-              </n-tag>
-            </div>
-            <n-text strong style="font-size: 16px">{{ item.name }}</n-text>
-            <n-space justify="space-between">
-              <n-text style="font-size: 18px; font-weight: bold">¥{{ getDailyCost(item).toFixed(2) }}/天</n-text>
-              <n-text style="color: #999; font-size: 14px">
-                ¥{{ item.buy_price.toFixed(0) }} · 已使用 {{ getHoldDays(item) }} 天
+    <!-- 资产列表 -->
+    <n-card size="small" style="border-radius: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.1);">
+      <template #header>
+        <n-space align="center" justify="space-between" style="width: 100%">
+          <n-space align="center">
+            <n-icon size="18" :component="BarChartOutline" />
+            <span style="font-size: 16px; font-weight: bold">资产列表</span>
+          </n-space>
+          <n-text style="font-size: 14px; color: #666">{{ filteredAssetCount }} 个资产</n-text>
+        </n-space>
+      </template>
+      <n-grid :cols="2" :x-gap="20" :y-gap="20" style="margin-top: 16px">
+        <n-gi v-for="(item, index) in filteredAssetList" :key="item.id">
+          <n-card hoverable size="small" class="asset-card" @click="showDetail(item)" style="border-radius: 12px; transition: all 0.3s ease; border: 1px solid #f0f0f0;">
+            <n-space vertical size="small">
+              <div style="text-align: right">
+                <n-tag :type="getActualStatusType(item)" size="small" :style="getStatusTagStyle(item)">
+                  {{ getActualStatusText(item) }}
+                </n-tag>
+              </div>
+              <n-text strong style="font-size: 16px; margin: 8px 0">{{ item.name }}</n-text>
+              <n-space justify="space-between" style="margin: 8px 0">
+                <n-text style="font-size: 18px; font-weight: bold; color: #18a058">¥{{ getDailyCost(item).toFixed(2) }}/天</n-text>
+                <n-text style="color: #999; font-size: 14px">
+                  ¥{{ item.buy_price.toFixed(0) }}
+                </n-text>
+              </n-space>
+              <n-text style="color: #666; font-size: 13px">
+                已使用 {{ getHoldDays(item) }} 天
               </n-text>
             </n-space>
-          </n-space>
-        </n-card>
-      </n-gi>
-    </n-grid>
-    <n-empty v-if="filteredAssetList.length === 0" description="暂无资产数据" style="margin: 40px 0" />
+          </n-card>
+        </n-gi>
+      </n-grid>
+      <n-empty v-if="filteredAssetList.length === 0" description="暂无资产数据" style="margin: 60px 0" />
+    </n-card>
   </n-space>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useAssetStore } from '../stores/assetStore';
-import { HomeOutline, CreateOutline, AlertCircleOutline, StarOutline } from '@vicons/ionicons5';
+import { HomeOutline, CreateOutline, AlertCircleOutline, StarOutline, WalletOutline, BarChartOutline } from '@vicons/ionicons5';
 
 const store = useAssetStore();
 
@@ -242,6 +288,24 @@ const getActualStatusText = (item: any) => {
   return statusTextMap[item.status];
 };
 
+const getStatusTagStyle = (item: any) => {
+  if (item.warranty_date) {
+    const warrantyEnd = new Date(item.warranty_date);
+    const today = new Date();
+    if (warrantyEnd >= today) {
+      return { background: '#52c41a', borderColor: '#52c41a' };
+    }
+  }
+  const statusColors = {
+    0: { background: '#52c41a', borderColor: '#52c41a' },
+    1: { background: '#1890ff', borderColor: '#1890ff' },
+    2: { background: '#faad14', borderColor: '#faad14' },
+    3: { background: '#f5222d', borderColor: '#f5222d' },
+    4: { background: '#8c8c8c', borderColor: '#8c8c8c' }
+  };
+  return statusColors[item.status] || {};
+};
+
 const showDetail = (item: any) => {
   store.currentAsset = item;
   store.showDetailModal = true;
@@ -280,17 +344,32 @@ const highPriorityWishlist = computed(() => {
 </script>
 
 <style scoped>
+/* 筛选按钮样式 */
+.filter-button {
+  transition: all 0.2s ease;
+  border-radius: 20px !important;
+  padding: 6px 16px !important;
+}
+
+.filter-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(24, 160, 88, 0.2);
+}
+
+/* 资产卡片样式 */
 .asset-card {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   border: 1px solid #f0f0f0;
+  overflow: hidden;
 }
 
 .asset-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-  border-color: #e8f5e8;
+  transform: translateY(-6px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.15);
+  border-color: #18a058;
 }
 
+/* 提醒项样式 */
 .reminder-item {
   transition: all 0.2s ease;
   border-radius: 8px;
@@ -299,7 +378,8 @@ const highPriorityWishlist = computed(() => {
 
 .reminder-item:hover {
   background-color: rgba(24, 160, 88, 0.05);
-  transform: translateX(4px);
+  transform: translateX(6px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .reminder-content {
@@ -310,6 +390,7 @@ const highPriorityWishlist = computed(() => {
   font-weight: bold;
   margin-bottom: 4px;
   font-size: 14px;
+  color: #333;
 }
 
 .reminder-desc {
@@ -321,7 +402,7 @@ const highPriorityWishlist = computed(() => {
 @keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(30px);
   }
   to {
     opacity: 1;
@@ -329,14 +410,66 @@ const highPriorityWishlist = computed(() => {
   }
 }
 
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* 应用动画到不同元素 */
 .asset-card {
-  animation: fadeInUp 0.5s ease-out;
+  animation: fadeInUp 0.5s ease-out forwards;
+}
+
+.reminder-item {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+/* 卡片头部动画 */
+.n-card-header {
+  animation: fadeIn 0.4s ease-out forwards;
 }
 
 /* 响应式调整 */
 @media (max-width: 768px) {
   .asset-card {
-    margin-bottom: 12px;
+    margin-bottom: 16px;
   }
+  
+  .n-grid {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .filter-button {
+    font-size: 12px !important;
+    padding: 4px 12px !important;
+  }
+  
+  .n-card {
+    margin-bottom: 16px;
+  }
+}
+
+/* 滚动条样式 */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
 }
 </style>
