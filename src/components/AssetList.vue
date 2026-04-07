@@ -20,7 +20,7 @@
               </template>
             </n-input>
             <!-- 排序按钮 -->
-            <n-dropdown trigger="click" @select="(value: string) => store.sortBy = value">
+            <n-dropdown trigger="click" @select="(value) => store.sortBy = value">
               <n-button circle size="small">
                 <n-icon :component="SwapVerticalOutline" />
               </n-button>
@@ -207,10 +207,10 @@ export default {
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useAssetStore } from '../stores/assetStore';
-import { HomeOutline, CreateOutline, AlertCircleOutline, StarOutline, WalletOutline, BarChartOutline, SearchOutline, SwapVerticalOutline, AddOutline } from '@vicons/ionicons5';
+import { HomeOutline, AlertCircleOutline, StarOutline, WalletOutline, BarChartOutline, SearchOutline, SwapVerticalOutline, AddOutline } from '@vicons/ionicons5';
 import {
-  NCard, NSpace, NIcon, NSelect, NButton, NTag, NList, NListItem, 
-  NAvatar, NGrid, NGi, NText, NDivider, NEmpty, NInput, NDropdown, NMenu
+  NCard, NSpace, NIcon, NButton, NTag, NList, NListItem, 
+  NAvatar, NGrid, NGi, NText, NEmpty, NInput, NDropdown, NMenu
 } from "naive-ui";
 
 const store = useAssetStore();

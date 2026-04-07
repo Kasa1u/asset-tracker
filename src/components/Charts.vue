@@ -114,7 +114,7 @@ let monthlyChart: echarts.ECharts | null = null;
 
 const currentTime = new Date();
 
-const statusColorMap = {
+const statusColorMap: Record<number, string> = {
   0: '#18a058',
   1: '#2080f0',
   2: '#f0a020',
@@ -122,7 +122,7 @@ const statusColorMap = {
   4: '#909399'
 };
 
-const statusTextMap = {
+const statusTextMap: Record<number, string> = {
   0: '保障中',
   1: '活跃中',
   2: '已退役',
