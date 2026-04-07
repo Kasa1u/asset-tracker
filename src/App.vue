@@ -146,35 +146,6 @@
       </template>
     </n-modal>
 
-    <!-- 状态变更弹窗 -->
-    <n-modal v-model:show="store.showSellModal" preset="card" title="状态变更" style="width: 500px; border-radius: 16px;">
-      <n-form :model="store.sellForm" label-placement="left" label-width="auto">
-        <n-form-item label="物品名称"><n-input v-model:value="store.sellForm.name" disabled /></n-form-item>
-        <n-form-item label="购入价格">
-          <n-input-number v-model:value="store.sellForm.buy_price" disabled style="width: 100%" :show-button="false">
-            <template #prefix>¥</template>
-          </n-input-number>
-        </n-form-item>
-        <n-form-item label="新状态">
-          <n-select v-model:value="store.sellForm.new_status" :options="statusOptions.filter(o => o.value !== '')" style="width: 100%" />
-        </n-form-item>
-        <n-form-item label="卖出价格" v-if="store.sellForm.new_status === 4">
-          <n-input-number v-model:value="store.sellForm.sell_price" :min="0" style="width: 100%" :show-button="false">
-            <template #prefix>¥</template>
-          </n-input-number>
-        </n-form-item>
-        <n-form-item label="卖出日期" v-if="store.sellForm.new_status === 4">
-          <n-date-picker v-model:formatted-value="store.sellForm.sell_date" value-format="yyyy-MM-dd" type="date" style="width: 100%" />
-        </n-form-item>
-      </n-form>
-      <template #footer>
-        <div class="modal-footer">
-          <n-button @click="store.showSellModal = false">取消</n-button>
-          <n-button type="primary" @click="handleConfirmStatusChange">确认变更</n-button>
-        </div>
-      </template>
-    </n-modal>
-
     <!-- 添加心愿弹窗 -->
     <n-modal v-model:show="store.showWishlistModal" preset="card" title="添加心愿" style="width: 500px; border-radius: 16px;">
       <n-form :model="store.wishlistForm" label-placement="left" label-width="auto">
@@ -273,7 +244,7 @@ import {
   NSelect, NTag, NModal, NDescriptions, NDescriptionsItem, NDivider,
   createDiscreteApi,
 } from "naive-ui";
-import { InformationCircleOutline, CreateOutline, TrashOutline, TrendingUpOutline,
+import { InformationCircleOutline, CreateOutline, TrashOutline,
          HomeOutline, HeartOutline, TimeOutline, BarChartOutline } from "@vicons/ionicons5";
 import { initDatabase } from "./db";
 import AssetList from './components/AssetList.vue';
@@ -456,29 +427,6 @@ const handleUpdate = async () => {
     store.showEditModal = false;
     await refreshData();
   } catch (e) { message.error("更新失败"); }
-};
-
-const handleSell = (item: any) => {
-  if (!item) return;
-  store.sellingId = item.id;
-  store.sellForm = { name: item.name, buy_price: item.buy_price, sell_price: item.buy_price, sell_date: today, new_status: item.status };
-  store.showDetailModal = false;
-  store.showSellModal = true;
-};
-
-const handleConfirmStatusChange = async () => {
-  if (store.sellForm.new_status === 4 && !store.sellForm.sell_price) { message.warning("请输入卖出价格"); return; }
-  try {
-    if (store.sellForm.new_status === 4) {
-      await store.dbInstance.execute(`UPDATE assets SET status=?, sell_price=?, sell_date=? WHERE id=?`,
-        [store.sellForm.new_status, store.sellForm.sell_price, store.sellForm.sell_date, store.sellingId]);
-    } else {
-      await store.dbInstance.execute(`UPDATE assets SET status=? WHERE id=?`, [store.sellForm.new_status, store.sellingId]);
-    }
-    message.success("状态已变更");
-    store.showSellModal = false;
-    await refreshData();
-  } catch (e) { message.error("操作失败"); }
 };
 
 const handleDelete = async (id: number | undefined) => {

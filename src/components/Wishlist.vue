@@ -133,7 +133,8 @@ const handleBuyWishlist = (item: any) => {
     buy_date: new Date().toISOString().split('T')[0],
     warranty_date: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0],
     category: item.category,
-    remark: item.remark || ''
+    remark: item.remark || '',
+    image_path: ''
   };
   store.showAddModal = true;
   store.handleDeleteWishlist(item.id);

@@ -18,12 +18,10 @@ export const useAssetStore = defineStore("asset", () => {
   const currentLocale = ref<Locale>("zh");
   const showAddModal = ref(false);
   const showEditModal = ref(false);
-  const showSellModal = ref(false);
   const showDetailModal = ref(false);
   const showWishlistModal = ref(false);
   const showWishlistEditModal = ref(false);
   const editingId = ref<number | null>(null);
-  const sellingId = ref<number | null>(null);
   const editingWishlistId = ref<number | null>(null);
   const currentAsset = ref<Asset | null>(null);
   
@@ -48,14 +46,6 @@ export const useAssetStore = defineStore("asset", () => {
     sell_price: 0,
     sell_date: "",
     image_path: ""
-  });
-  
-  const sellForm = ref({
-    name: "",
-    buy_price: 0,
-    sell_price: 0,
-    sell_date: new Date().toISOString().split("T")[0],
-    new_status: 0
   });
   
   const wishlistForm = ref({
@@ -268,17 +258,14 @@ export const useAssetStore = defineStore("asset", () => {
     currentLocale,
     showAddModal,
     showEditModal,
-    showSellModal,
     showDetailModal,
     showWishlistModal,
     showWishlistEditModal,
     editingId,
-    sellingId,
     editingWishlistId,
     currentAsset,
     formData,
     editForm,
-    sellForm,
     wishlistForm,
     wishlistEditForm,
     initDB,

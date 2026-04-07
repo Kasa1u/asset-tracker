@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "有数资产 - 个人资产管理",
+        "title": "物账",
         "width": 800,
         "height": 600
       }
