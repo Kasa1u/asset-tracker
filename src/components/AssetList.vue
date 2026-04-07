@@ -20,13 +20,13 @@
               </template>
             </n-input>
             <!-- 排序按钮 -->
-            <n-dropdown trigger="click">
+            <n-dropdown trigger="click" @select="(value: string) => store.sortBy = value">
               <n-button circle size="small">
                 <n-icon :component="SwapVerticalOutline" />
               </n-button>
               <template #menu>
                 <n-menu>
-                  <n-menu-item v-for="option in store.sortOptions" :key="option.value" :value="option.value" @click="store.sortBy = option.value">
+                  <n-menu-item v-for="option in store.sortOptions" :key="option.value" :value="option.value">
                     {{ option.label }}
                   </n-menu-item>
                 </n-menu>
