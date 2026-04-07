@@ -331,43 +331,7 @@ const priorityOptions = [
   { label: "非常重要", value: 3 }
 ];
 
-const filteredAssetList = computed(() => {
-  currentTime.value;
-  return store.assetList
-    .filter(item => {
-      const matchKeyword = !store.searchKeyword || item.name.toLowerCase().includes(store.searchKeyword.toLowerCase());
-      const matchCategory = !store.filterCategory || item.category === store.filterCategory;
-      const actualStatus = getActualStatus(item);
-      const matchStatus = !store.filterStatus || String(actualStatus) === store.filterStatus;
-      return matchKeyword && matchCategory && matchStatus;
-    })
-    .map(item => ({
-      ...item,
-      dailyCost: getDailyCost(item)
-    }))
-    .sort((a, b) => {
-      const [field, order] = store.sortBy.split("_");
-      const isDesc = order === "desc";
-      let comparison = 0;
 
-      switch (field) {
-        case "id":
-          comparison = a.id - b.id;
-          break;
-        case "date":
-          comparison = new Date(a.buy_date).getTime() - new Date(b.buy_date).getTime();
-          break;
-        case "price":
-          comparison = a.buy_price - b.buy_price;
-          break;
-        case "dailyCost":
-          comparison = a.dailyCost - b.dailyCost;
-          break;
-      }
-
-      return isDesc ? -comparison : comparison;
-    });
-});
 
 const getHoldDays = (item: any | null) => {
   if (!item) return 0;
@@ -397,18 +361,7 @@ const getStatusType = (status: number | undefined): "primary" | "default" | "suc
   return typeMap[status as number] || "default";
 };
 
-const getActualStatus = (item: any) => {
-  if (item.status >= 2) return item.status;
-  
-  const warrantyDate = item.warranty_date ? new Date(item.warranty_date) : null;
-  const now = currentTime.value;
-  
-  if (item.status === 0 && warrantyDate && now < warrantyDate) {
-    return 0;
-  }
-  
-  return 1;
-};
+
 
 const handleDateChange = (val: any) => {
   if (!val) return;
@@ -531,13 +484,7 @@ const handleUpdateWishlist = async () => {
   } catch (e) { message.error("更新失败"); }
 };
 
-const handleDeleteWishlist = async (id: number) => {
-  try {
-    await store.dbInstance.execute("DELETE FROM wishlist WHERE id = ?", [id]);  
-    message.info("已删除");
-    await refreshData();
-  } catch (e) { message.error("删除失败"); }
-};
+
 
 onMounted(async () => {
   try {

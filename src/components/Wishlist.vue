@@ -67,8 +67,8 @@ import {
 
 const store = useAssetStore();
 
-const getPriorityType = (priority: number) => {
-  const map: Record<number, string> = {
+const getPriorityType = (priority: number): "primary" | "default" | "success" | "error" | "warning" | "info" | undefined => {
+  const map: Record<number, "primary" | "default" | "success" | "error" | "warning" | "info"> = {
     0: 'default',
     1: 'default',
     2: 'info',
