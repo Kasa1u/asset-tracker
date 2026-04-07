@@ -238,6 +238,16 @@ export const useAssetStore = defineStore("asset", () => {
     { label: t("chartRange.all"), value: "all" }
   ]);
 
+  const handleDeleteWishlist = async (id: number) => {
+    if (!dbInstance.value) return;
+    try {
+      await dbInstance.value.execute("DELETE FROM wishlist WHERE id = ?", [id]);
+      await refreshData();
+    } catch (e) {
+      console.error("删除心愿失败:", e);
+    }
+  };
+
   return {
     dbInstance,
     assetList,
@@ -270,6 +280,7 @@ export const useAssetStore = defineStore("asset", () => {
     refreshData,
     t,
     sortOptions,
-    chartRangeOptions
+    chartRangeOptions,
+    handleDeleteWishlist
   };
 });
