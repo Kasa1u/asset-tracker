@@ -483,7 +483,7 @@ const initDetailChart = () => {
   const totalDays = Math.floor((endDate.getTime() - buyDate.getTime()) / 86400000) + 1;
   
   const data = [];
-  const maxDays = Math.min(totalDays, 365);
+  const maxDays = totalDays;
   
   // 生成2的幂次序列作为横坐标标签
   const categories: string[] = [];
