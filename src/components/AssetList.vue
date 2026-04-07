@@ -6,21 +6,36 @@
         <n-space align="center" justify="space-between" style="width: 100%">
           <n-space align="center">
             <n-icon size="20" :component="HomeOutline" />
-            <span style="font-size: 18px; font-weight: bold">{{ store.t('home') }}</span>
+            <span style="font-size: 18px; font-weight: bold">{{ store.t('totalAssets') }}</span>
           </n-space>
           <n-space>
-            <!-- 排序按钮 -->
-            <n-select 
-              v-model:value="store.sortBy" 
-              :options="store.sortOptions"
+            <!-- 搜索框 -->
+            <n-input
+              v-model:value="store.searchKeyword"
               size="small"
-              style="width: 180px; background: rgba(255,255,255,0.2); border: none; color: white"
-              :placeholder="store.t('sort')"
-            />
+              placeholder="搜索资产"
+              style="width: 200px; background: rgba(255,255,255,0.2); border: none; color: white"
+            >
+              <template #prefix>
+                <n-icon size="16" :component="SearchOutline" />
+              </template>
+            </n-input>
+            <!-- 排序按钮 -->
+            <n-dropdown trigger="click">
+              <n-button circle size="small" style="background: rgba(255,255,255,0.2); border: none; color: white">
+                <n-icon :component="SwapVerticalOutline" />
+              </n-button>
+              <template #menu>
+                <n-menu v-model:value="store.sortBy">
+                  <n-menu-item v-for="option in store.sortOptions" :key="option.value" :value="option.value">
+                    {{ option.label }}
+                  </n-menu-item>
+                </n-menu>
+              </template>
+            </n-dropdown>
             <!-- 添加资产按钮 -->
-            <n-button type="primary" size="small" @click="store.showAddModal = true" style="background: white; color: #2080f0">
-              <template #icon><n-icon :component="CreateOutline" /></template>
-              {{ store.t('add') }}
+            <n-button circle type="primary" size="small" @click="store.showAddModal = true" style="background: white; color: #2080f0">
+              <n-icon :component="AddOutline" />
             </n-button>
           </n-space>
         </n-space>
@@ -115,7 +130,7 @@
                 v-for="status in ['', '0', '1', '2', '3', '4']" 
                 :key="status"
                 :type="store.filterStatus === status ? 'primary' : 'default'"
-                :style="store.filterStatus === status ? { background: '#18a058', borderColor: '#18a058' } : {}"
+                :style="store.filterStatus === status ? { background: '#2080f0', borderColor: '#2080f0', color: 'white' } : {}"
                 quaternary
                 size="small"
                 @click="store.filterStatus = status"
@@ -135,7 +150,7 @@
                 v-for="cat in categoryOptionsWithAll" 
                 :key="cat.value"
                 :type="store.filterCategory === cat.value ? 'primary' : 'default'"
-                :style="store.filterCategory === cat.value ? { background: '#18a058', borderColor: '#18a058' } : {}"
+                :style="store.filterCategory === cat.value ? { background: '#2080f0', borderColor: '#2080f0', color: 'white' } : {}"
                 quaternary
                 size="small"
                 @click="store.filterCategory = cat.value"
@@ -197,10 +212,10 @@ export default {
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useAssetStore } from '../stores/assetStore';
-import { HomeOutline, CreateOutline, AlertCircleOutline, StarOutline, WalletOutline, BarChartOutline } from '@vicons/ionicons5';
+import { HomeOutline, CreateOutline, AlertCircleOutline, StarOutline, WalletOutline, BarChartOutline, SearchOutline, SwapVerticalOutline, AddOutline } from '@vicons/ionicons5';
 import {
   NCard, NSpace, NIcon, NSelect, NButton, NTag, NList, NListItem, 
-  NAvatar, NGrid, NGi, NText, NDivider, NEmpty
+  NAvatar, NGrid, NGi, NText, NDivider, NEmpty, NInput, NDropdown, NMenu
 } from "naive-ui";
 
 const store = useAssetStore();
@@ -290,7 +305,7 @@ const getActualStatusType = (item: any): "primary" | "default" | "success" | "er
     3: 'error',
     4: 'default'
   };
-  return typeMap[item.status] || 'default';
+  return typeMap[item.status as number] || 'default';
 };
 
 const getActualStatusText = (item: any) => {
@@ -309,17 +324,17 @@ const getStatusTagStyle = (item: any) => {
     const warrantyEnd = new Date(item.warranty_date);
     const today = new Date();
     if (warrantyEnd >= today) {
-      return { background: '#52c41a', borderColor: '#52c41a' };
+      return { background: '#f6ffed', borderColor: '#b7eb8f', color: '#52c41a', padding: '2px 8px' };
     }
   }
-  const statusColors: Record<number, { background: string; borderColor: string }> = {
-    0: { background: '#52c41a', borderColor: '#52c41a' },
-    1: { background: '#1890ff', borderColor: '#1890ff' },
-    2: { background: '#faad14', borderColor: '#faad14' },
-    3: { background: '#f5222d', borderColor: '#f5222d' },
-    4: { background: '#8c8c8c', borderColor: '#8c8c8c' }
+  const statusColors: Record<number, { background: string; borderColor: string; color: string; padding: string }> = {
+    0: { background: '#f6ffed', borderColor: '#b7eb8f', color: '#52c41a', padding: '2px 8px' },
+    1: { background: '#e6f7ff', borderColor: '#91d5ff', color: '#1890ff', padding: '2px 8px' },
+    2: { background: '#fffbe6', borderColor: '#ffe58f', color: '#faad14', padding: '2px 8px' },
+    3: { background: '#fff1f0', borderColor: '#ffccc7', color: '#f5222d', padding: '2px 8px' },
+    4: { background: '#f5f5f5', borderColor: '#d9d9d9', color: '#8c8c8c', padding: '2px 8px' }
   };
-  return statusColors[item.status as number] || {};
+  return statusColors[item.status as number] || { padding: '2px 8px' };
 };
 
 const showDetail = (item: any) => {
