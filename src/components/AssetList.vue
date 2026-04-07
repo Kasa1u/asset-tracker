@@ -144,17 +144,6 @@
               <div class="image-placeholder" v-if="!item.image_path">
                 <n-icon :component="getCategoryIcon(item.category)" size="22" />
               </div>
-              <!-- 上传按钮 -->
-              <label class="upload-overlay" :for="`upload-${item.id}`" title="点击上传图片">
-                <n-icon :component="item.image_path ? CameraOutline : CameraOutline" size="14" />
-              </label>
-              <input
-                :id="`upload-${item.id}`"
-                type="file"
-                accept="image/*"
-                class="file-input"
-                @change="(e) => handleImageUpload(e, item)"
-              />
             </div>
           </div>
 
@@ -179,7 +168,7 @@
       </div>
 
       <div class="empty-state" v-else>
-        <n-icon :component="InboxOutline" size="36" />
+        <n-icon :component="AppsOutline" size="36" />
         <p>暂无资产数据</p>
       </div>
     </div>
@@ -196,12 +185,10 @@ import { useAssetStore } from '../stores/assetStore';
 import {
   SearchOutline, SwapVerticalOutline, AddOutline,
   AlertCircleOutline, FunnelOutline, LayersOutline,
-  CameraOutline,
   LaptopOutline, HomeOutline, ShirtOutline, BarbellOutline,
   BookOutline, FlaskOutline, AppsOutline
 } from '@vicons/ionicons5';
 import { NInput, NIcon, NDropdown } from "naive-ui";
-import { convertFileSrc } from '@tauri-apps/api/core';
 
 const store = useAssetStore();
 
@@ -328,39 +315,6 @@ const getActualStatusText = (item: any): string => {
     1: '活跃中', 2: '已退役', 3: '已用完', 4: '已售出'
   };
   return textMap[item.status] || '未知';
-};
-
-// ===== 图片上传 =====
-const handleImageUpload = async (event: Event, item: any) => {
-  const file = (event.target as HTMLInputElement).files?.[0];
-  if (!file) return;
-
-  try {
-    const arrayBuffer = await file.arrayBuffer();
-    const uint8Array = new Uint8Array(arrayBuffer);
-    const ext = file.name.split('.').pop() || 'jpg';
-    const fileName = `asset_${item.id}_${Date.now()}.${ext}`;
-
-    // 写入 Tauri 应用数据目录
-    await writeFile(fileName, uint8Array, { baseDir: BaseDirectory.AppData });
-
-    // 转换为可渲染的 asset URL
-    const { appDataDir } = await import('@tauri-apps/api/path');
-    const dir = await appDataDir();
-    const fullPath = `${dir}${fileName}`;
-    const assetUrl = convertFileSrc(fullPath);
-
-    // 更新数据库
-    await store.dbInstance.execute(
-      'UPDATE assets SET image_path = ? WHERE id = ?',
-      [fullPath, item.id]
-    );
-
-    // 更新本地状态
-    item.image_path = assetUrl;
-  } catch (e) {
-    console.error('图片上传失败:', e);
-  }
 };
 
 // ===== 详情 & 购入 =====
