@@ -499,6 +499,12 @@ const initDetailChart = () => {
     data.push([maxDays, dailyCost]);
   }
   
+  // 生成2的幂次序列作为横坐标刻度
+  const xAxisTicks = [];
+  for (let power = 0; Math.pow(2, power) <= maxDays; power++) {
+    xAxisTicks.push(Math.pow(2, power));
+  }
+  
   const option = {
     grid: {
       top: 40,
@@ -520,7 +526,17 @@ const initDetailChart = () => {
       nameLocation: 'middle',
       nameGap: 30,
       min: 1,
-      max: maxDays
+      max: maxDays,
+      interval: 1,
+      axisLabel: {
+        formatter: (value: number) => {
+          // 只显示2的幂次刻度
+          if (xAxisTicks.includes(value)) {
+            return value.toString();
+          }
+          return '';
+        }
+      }
     },
     yAxis: {
       type: 'value',

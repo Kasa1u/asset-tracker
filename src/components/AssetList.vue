@@ -135,7 +135,7 @@
           @click="showDetail(item)"
         >
           <!-- 图片区 -->
-          <div class="card-image-area" @click.stop>
+          <div class="card-image-area">
             <div
               class="card-image"
               :style="item.image_path ? `background-image: url('${item.image_path}')` : ''"
@@ -148,7 +148,7 @@
           </div>
 
           <!-- 内容区 -->
-          <div class="card-content" @click="showDetail(item)">
+          <div class="card-content">
             <div class="card-top-row">
               <span class="asset-name">{{ item.name }}</span>
               <span class="status-badge" :class="getStatusClass(item)">{{ getActualStatusText(item) }}</span>
