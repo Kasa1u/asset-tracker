@@ -26,6 +26,48 @@ export const useAssetStore = defineStore("asset", () => {
   const sellingId = ref<number | null>(null);
   const editingWishlistId = ref<number | null>(null);
   const currentAsset = ref<Asset | null>(null);
+  
+  const formData = ref({
+    name: "",
+    buy_price: 0,
+    buy_date: new Date().toISOString().split("T")[0],
+    warranty_date: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split("T")[0],
+    category: "电子产品",
+    remark: ""
+  });
+  
+  const editForm = ref({
+    name: "",
+    buy_price: 0,
+    buy_date: new Date().toISOString().split("T")[0],
+    warranty_date: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split("T")[0],
+    category: "电子产品",
+    remark: ""
+  });
+  
+  const sellForm = ref({
+    name: "",
+    buy_price: 0,
+    sell_price: 0,
+    sell_date: new Date().toISOString().split("T")[0],
+    new_status: 0
+  });
+  
+  const wishlistForm = ref({
+    name: "",
+    category: "电子产品",
+    expected_price: 0,
+    priority: 0,
+    remark: ""
+  });
+  
+  const wishlistEditForm = ref({
+    name: "",
+    category: "电子产品",
+    expected_price: 0,
+    priority: 0,
+    remark: ""
+  });
 
   const initDB = async () => {
     dbInstance.value = await initDatabase();
@@ -219,6 +261,11 @@ export const useAssetStore = defineStore("asset", () => {
     sellingId,
     editingWishlistId,
     currentAsset,
+    formData,
+    editForm,
+    sellForm,
+    wishlistForm,
+    wishlistEditForm,
     initDB,
     refreshData,
     t,
