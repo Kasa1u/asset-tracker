@@ -485,24 +485,21 @@ const initDetailChart = () => {
   const data = [];
   const maxDays = Math.min(totalDays, 365);
   
-  // 生成2的幂次序列：1, 2, 4, 8, 16, 32, ...
+  // 生成2的幂次序列作为横坐标标签
+  const categories: string[] = [];
   for (let power = 0; Math.pow(2, power) <= maxDays; power++) {
     const day = Math.pow(2, power);
+    categories.push(day.toString());
     const dailyCost = asset.buy_price / day;
-    data.push([day, dailyCost]);
+    data.push(dailyCost);
   }
   
   // 如果最后一天不是2的幂次，添加最后一天
   const lastPowerDay = Math.pow(2, Math.floor(Math.log2(maxDays)));
   if (lastPowerDay !== maxDays) {
+    categories.push(maxDays.toString());
     const dailyCost = asset.buy_price / maxDays;
-    data.push([maxDays, dailyCost]);
-  }
-  
-  // 生成2的幂次序列作为横坐标刻度
-  const xAxisTicks: number[] = [];
-  for (let power = 0; Math.pow(2, power) <= maxDays; power++) {
-    xAxisTicks.push(Math.pow(2, power));
+    data.push(dailyCost);
   }
   
   const option = {
@@ -515,25 +512,20 @@ const initDetailChart = () => {
     tooltip: {
       trigger: 'axis',
       formatter: (params: any) => {
-        const day = params[0].value[0];
-        const cost = params[0].value[1];
+        const index = params[0].dataIndex;
+        const day = parseInt(categories[index]);
+        const cost = params[0].value;
         return `第 ${day} 天<br/>日均成本: ¥${cost.toFixed(2)}`;
       }
     },
     xAxis: {
-      type: 'log',
+      type: 'category',
       name: '持有天数',
       nameLocation: 'middle',
       nameGap: 30,
-      logBase: 2,
+      data: categories,
       axisLabel: {
-        formatter: (value: number) => {
-          // 只显示2的幂次刻度
-          if (xAxisTicks.includes(value)) {
-            return value.toString();
-          }
-          return '';
-        }
+        interval: 0
       }
     },
     yAxis: {
