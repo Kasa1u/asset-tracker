@@ -20,12 +20,12 @@
               </template>
             </n-input>
             <!-- 排序按钮 -->
-            <n-dropdown trigger="click" @select="(value) => store.sortBy = value">
+            <n-dropdown trigger="click">
               <n-button circle size="small">
                 <n-icon :component="SwapVerticalOutline" />
               </n-button>
               <template #menu>
-                <n-menu>
+                <n-menu @select="(value) => store.sortBy = value">
                   <n-menu-item v-for="option in store.sortOptions" :key="option.value" :value="option.value">
                     {{ option.label }}
                   </n-menu-item>
@@ -52,7 +52,7 @@
           <n-gi>
             <n-space align="center">
               <n-text style="color: #666; font-size: 14px; margin-right: 8px">{{ store.t('assetCount') }}:</n-text>
-              <n-text strong style="font-size: 18px; font-weight: bold">{{ filteredAssetCount }}/10</n-text>
+              <n-text strong style="font-size: 18px; font-weight: bold">{{ filteredAssetCount }}/{{ store.assetCount }}</n-text>
             </n-space>
           </n-gi>
         </n-grid>
