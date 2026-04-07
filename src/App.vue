@@ -521,13 +521,11 @@ const initDetailChart = () => {
       }
     },
     xAxis: {
-      type: 'value',
+      type: 'log',
       name: '持有天数',
       nameLocation: 'middle',
       nameGap: 30,
-      min: 1,
-      max: maxDays,
-      interval: 1,
+      logBase: 2,
       axisLabel: {
         formatter: (value: number) => {
           // 只显示2的幂次刻度
