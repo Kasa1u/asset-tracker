@@ -25,8 +25,8 @@
                 <n-icon :component="SwapVerticalOutline" />
               </n-button>
               <template #menu>
-                <n-menu @select="(value) => store.sortBy = value">
-                  <n-menu-item v-for="option in store.sortOptions" :key="option.value" :value="option.value">
+                <n-menu>
+                  <n-menu-item v-for="option in store.sortOptions" :key="option.value" :value="option.value" @click="store.sortBy = option.value">
                     {{ option.label }}
                   </n-menu-item>
                 </n-menu>
@@ -182,12 +182,10 @@
                 </n-tag>
               </div>
               <n-text strong style="font-size: 16px; margin: 8px 0">{{ item.name }}</n-text>
-              <n-space justify="space-between" style="margin: 8px 0">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin: 8px 0">
                 <n-text style="font-size: 18px; font-weight: bold; color: #18a058">¥{{ getDailyCost(item).toFixed(2) }}/天</n-text>
-                <n-text style="color: #999; font-size: 14px">
-                  ¥{{ item.buy_price.toFixed(0) }}
-                </n-text>
-              </n-space>
+                <n-text style="color: #999; font-size: 14px">¥{{ item.buy_price.toFixed(0) }}</n-text>
+              </div>
               <n-text style="color: #666; font-size: 13px">
                 已使用 {{ getHoldDays(item) }} 天
               </n-text>
