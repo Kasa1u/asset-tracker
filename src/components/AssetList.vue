@@ -162,7 +162,7 @@
         </n-space>
       </template>
       <n-grid :cols="2" :x-gap="20" :y-gap="20" style="margin-top: 16px">
-        <n-gi v-for="(item, index) in filteredAssetList" :key="item.id">
+        <n-gi v-for="item in filteredAssetList" :key="item.id">
           <n-card hoverable size="small" class="asset-card" @click="showDetail(item)" style="border-radius: 12px; transition: all 0.3s ease; border: 1px solid #f0f0f0;">
             <n-space vertical size="small">
               <div style="text-align: right">
@@ -188,6 +188,12 @@
     </n-card>
   </n-space>
 </template>
+
+<script lang="ts">
+export default {
+  name: 'AssetList'
+}
+</script>
 
 <script setup lang="ts">
 import { computed } from 'vue';

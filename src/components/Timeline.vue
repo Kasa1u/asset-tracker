@@ -37,6 +37,12 @@
   </n-card>
 </template>
 
+<script lang="ts">
+export default {
+  name: 'Timeline'
+}
+</script>
+
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useAssetStore } from '../stores/assetStore';

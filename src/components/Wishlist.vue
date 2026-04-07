@@ -51,6 +51,12 @@
   </n-card>
 </template>
 
+<script lang="ts">
+export default {
+  name: 'Wishlist'
+}
+</script>
+
 <script setup lang="ts">
 import { useAssetStore } from '../stores/assetStore';
 import { ListOutline, CreateOutline } from '@vicons/ionicons5';
@@ -62,7 +68,7 @@ import {
 const store = useAssetStore();
 
 const getPriorityType = (priority: number) => {
-  const map = {
+  const map: Record<number, string> = {
     0: 'default',
     1: 'default',
     2: 'info',
@@ -74,7 +80,7 @@ const getPriorityType = (priority: number) => {
 };
 
 const getPriorityText = (priority: number) => {
-  const map = {
+  const map: Record<number, string> = {
     0: '无',
     1: '低',
     2: '中',

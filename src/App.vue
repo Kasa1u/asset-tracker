@@ -257,21 +257,19 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed, watch, nextTick } from "vue";
+import { ref, onMounted, computed, nextTick } from "vue";
 import { useAssetStore } from "./stores/assetStore";
 import type { Asset } from "./types";
-import * as echarts from 'echarts';
 
 const store = useAssetStore();
 
 import {
   NConfigProvider, NSpace, NCard, NForm, NFormItem, NInput, NInputNumber,
-  NButton, NGradientText, NStatistic, NDatePicker, NGrid, NGi, NIcon,
+  NButton, NGradientText, NDatePicker, NGrid, NGi, NIcon,
   NSelect, NTag, NModal, NDescriptions, NDescriptionsItem, NDivider,
-  NEllipsis, NEmpty, NTimeline, NTimelineItem, NText, NTabs, NTabPane, createDiscreteApi,
-  NAlert,
+  NTabs, NTabPane, createDiscreteApi,
 } from "naive-ui";
-import { BarChartOutline, ListOutline, InformationCircleOutline, CreateOutline, TrashOutline, TrendingUpOutline, AddOutline, NotificationsOutline, WalletOutline } from "@vicons/ionicons5";
+import { InformationCircleOutline, CreateOutline, TrashOutline, TrendingUpOutline } from "@vicons/ionicons5";
 import { initDatabase } from "./db";
 import AssetList from './components/AssetList.vue';
 import Wishlist from './components/Wishlist.vue';
@@ -290,7 +288,6 @@ const categoryOptions = [
   { label: "其他", value: "其他" },
 ];
 
-const categoryOptionsWithAll = [{ label: "全部", value: "" }, ...categoryOptions];
 const statusOptions = [
   { label: "全部", value: "" },
   { label: "保障中", value: "0" },
@@ -308,14 +305,6 @@ const statusTextMap: Record<number, string> = {
   4: "已售出"
 };
 
-const statusColorMap: Record<number, string> = {
-  0: "#2080f0",
-  1: "#18a058",
-  2: "#909399",
-  3: "#f0a020",
-  4: "#d03050"
-};
-
 
 
 const themeOverrides = {
@@ -330,31 +319,10 @@ const themeOverrides = {
 
 const currentTime = ref(new Date());
 
-const barChartRef = ref<HTMLElement>();
-const detailChartRef = ref<HTMLElement>();
-const statusBarChartRef = ref<HTMLElement>();
-const categoryBarChartRef = ref<HTMLElement>();
-const categoryPieChartRef = ref<HTMLElement>();
-const statusOverviewRef = ref<HTMLElement>();
-const holdPeriodRef = ref<HTMLElement>();
-const scatterChartRef = ref<HTMLElement>();
-const monthlyChartRef = ref<HTMLElement>();
-let barChart: echarts.ECharts | null = null;
-let detailChart: echarts.ECharts | null = null;
-let statusBarChart: echarts.ECharts | null = null;
-let categoryBarChart: echarts.ECharts | null = null;
-let categoryPieChart: echarts.ECharts | null = null;
-let statusOverviewChart: echarts.ECharts | null = null;
-let holdPeriodChart: echarts.ECharts | null = null;
-let scatterChart: echarts.ECharts | null = null;
-let monthlyChart: echarts.ECharts | null = null;
-
 const today = new Date().toISOString().split("T")[0];
 const nextYear = new Date();
 nextYear.setFullYear(nextYear.getFullYear() + 1);
 const defaultNextYear = nextYear.toISOString().split("T")[0];
-
-
 
 const priorityOptions = [
   { label: "一般", value: 0 },
@@ -362,56 +330,6 @@ const priorityOptions = [
   { label: "重要", value: 2 },
   { label: "非常重要", value: 3 }
 ];
-
-const timelineData = computed(() => {
-  return [...store.assetList].sort((a, b) => new Date(a.buy_date).getTime() - new Date(b.buy_date).getTime());
-});
-
-const getTimelineType = (item: any) => {
-  const actualStatus = getActualStatus(item);
-  const typeMap: Record<number, any> = {
-    0: "info",
-    1: "success",
-    2: "default",
-    3: "warning",
-    4: "error"
-  };
-  return typeMap[actualStatus] || "default";
-};
-
-const getAssetsByStatus = (status: number) => {
-  return store.assetList.reduce((sum, item) => {
-    const actualStatus = getActualStatus(item);
-    return actualStatus === status ? sum + item.buy_price : sum;
-  }, 0);
-};
-
-const getCountByStatus = (status: number) => {
-  return store.assetList.reduce((count, item) => {
-    const actualStatus = getActualStatus(item);
-    return actualStatus === status ? count + 1 : count;
-  }, 0);
-};
-
-const getHoldPeriod = (item: any) => {
-  const buyDate = new Date(item.buy_date);
-  const endDate = item.status === 4 && item.sell_date ? new Date(item.sell_date) : currentTime.value;
-  const days = Math.floor((endDate.getTime() - buyDate.getTime()) / 86400000);
-  return days;
-};
-
-
-
-const getHoldPeriodCategory = (days: number) => {
-  if (days < 90) return "0-3个月";
-  if (days < 180) return "3-6个月";
-  if (days < 365) return "6-12个月";
-  if (days < 730) return "1-2年";
-  if (days < 1095) return "2-3年";
-  return "3年以上";
-};
-
-
 
 const filteredAssetList = computed(() => {
   currentTime.value;
@@ -449,30 +367,6 @@ const filteredAssetList = computed(() => {
 
       return isDesc ? -comparison : comparison;
     });
-});
-
-const filteredTotalInvestment = computed(() => {
-  return filteredAssetList.value.reduce((sum, item) => sum + item.buy_price, 0);
-});
-
-const filteredAssetCount = computed(() => {
-  return filteredAssetList.value.length;
-});
-
-const filteredDailyAverageCost = computed(() => {
-  const now = currentTime.value;
-  return filteredAssetList.value.reduce((total, item) => {
-    const buyDate = new Date(item.buy_date);
-    if (item.status === 4 && item.sell_date) {
-      const sellDate = new Date(item.sell_date);
-      const days = Math.max(1, Math.floor((sellDate.getTime() - buyDate.getTime()) / 86400000) + 1);
-      return total + (item.buy_price - (item.sell_price || 0)) / days;
-    } else if (item.status < 2) {
-      const days = Math.max(1, Math.floor((now.getTime() - buyDate.getTime()) / 86400000) + 1);
-      return total + item.buy_price / days;
-    }
-    return total;
-  }, 0);
 });
 
 const getHoldDays = (item: any | null) => {
@@ -515,49 +409,6 @@ const getActualStatus = (item: any) => {
   
   return 1;
 };
-
-const getDaysUntilWarrantyExpires = (item: any) => {
-  if (!item.warranty_date) return Infinity;
-  const warrantyDate = new Date(item.warranty_date);
-  const now = currentTime.value;
-  const days = Math.ceil((warrantyDate.getTime() - now.getTime()) / 86400000);
-  return days;
-};
-
-const expiringWarranties = computed(() => {
-  return store.assetList
-    .filter(item => {
-      const actualStatus = getActualStatus(item);
-      if (actualStatus !== 0) return false;
-      const days = getDaysUntilWarrantyExpires(item);
-      return days > 0 && days <= 30;
-    })
-    .map(item => ({
-      ...item,
-      daysUntilExpire: getDaysUntilWarrantyExpires(item)
-    }))
-    .sort((a, b) => a.daysUntilExpire - b.daysUntilExpire);
-});
-
-const highPriorityWishlist = computed(() => {
-  return store.wishlist
-    .filter(item => item.priority >= 2)
-    .sort((a, b) => b.priority - a.priority);
-});
-
-const getActualStatusText = (item: any) => {
-  const actualStatus = getActualStatus(item);
-  return statusTextMap[actualStatus] || "未知";
-};
-
-const getActualStatusType = (item: any) => {
-  const actualStatus = getActualStatus(item);
-  return getStatusType(actualStatus);
-};
-
-
-
-
 
 const handleDateChange = (val: any) => {
   if (!val) return;
@@ -686,21 +537,6 @@ const handleDeleteWishlist = async (id: number) => {
     message.info("已删除");
     await refreshData();
   } catch (e) { message.error("删除失败"); }
-};
-
-const handleBuyWishlist = async (item: any) => {
-  if (!item) return;
-  store.formData = {
-    name: item.name,
-    buy_price: item.expected_price || 0,
-    buy_date: today,
-    warranty_date: defaultNextYear,
-    category: item.category,
-    remark: item.remark || ""
-  };
-  await handleDeleteWishlist(item.id);
-  store.currentTab = "home";
-  message.success("已将心愿加入到新增资产表单中，快去保存吧！");
 };
 
 onMounted(async () => {

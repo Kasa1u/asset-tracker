@@ -76,6 +76,12 @@
   </n-card>
 </template>
 
+<script lang="ts">
+export default {
+  name: 'Charts'
+}
+</script>
+
 <script setup lang="ts">
 import { ref, onMounted, watch, nextTick } from 'vue';
 import { useAssetStore } from '../stores/assetStore';
