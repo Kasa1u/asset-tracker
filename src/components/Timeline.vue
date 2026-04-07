@@ -63,7 +63,7 @@ const timelineData = computed(() => {
 const getTimelineType = (item: any): "default" | "success" | "error" | "warning" | "info" => {
   const typeMap: Record<number, "default" | "success" | "error" | "warning" | "info"> = {
     0: 'success',
-    1: 'primary',
+    1: 'info',
     2: 'warning',
     3: 'error',
     4: 'default'
@@ -71,7 +71,7 @@ const getTimelineType = (item: any): "default" | "success" | "error" | "warning"
   return typeMap[item.status] || 'default';
 };
 
-const getActualStatusType = (item: any): "primary" | "default" | "success" | "error" | "warning" | "info" | undefined => {
+const getActualStatusType = (item: any): "default" | "success" | "error" | "warning" | "info" | undefined => {
   if (item.warranty_date) {
     const warrantyEnd = new Date(item.warranty_date);
     const today = new Date();
@@ -79,14 +79,14 @@ const getActualStatusType = (item: any): "primary" | "default" | "success" | "er
       return 'success';
     }
   }
-  const typeMap: Record<number, "primary" | "default" | "success" | "error" | "warning" | "info"> = {
+  const typeMap: Record<number, "default" | "success" | "error" | "warning" | "info"> = {
     0: 'success',
-    1: 'primary',
+    1: 'info',
     2: 'warning',
     3: 'error',
     4: 'default'
   };
-  return typeMap[item.status] || 'default';
+  return typeMap[item.status as number] || 'default';
 };
 
 const getActualStatusText = (item: any) => {
