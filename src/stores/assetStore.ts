@@ -33,7 +33,8 @@ export const useAssetStore = defineStore("asset", () => {
     buy_date: new Date().toISOString().split("T")[0],
     warranty_date: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split("T")[0],
     category: "电子产品",
-    remark: ""
+    remark: "",
+    image_path: ""
   });
   
   const editForm = ref({
@@ -42,7 +43,11 @@ export const useAssetStore = defineStore("asset", () => {
     buy_date: new Date().toISOString().split("T")[0],
     warranty_date: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split("T")[0],
     category: "电子产品",
-    remark: ""
+    remark: "",
+    status: 0,
+    sell_price: 0,
+    sell_date: "",
+    image_path: ""
   });
   
   const sellForm = ref({

@@ -83,10 +83,7 @@
             <n-button size="small" type="primary" @click="handleEdit(store.currentAsset)" :disabled="store.currentAsset?.status === 1">
               <template #icon><n-icon :component="CreateOutline" /></template>编辑
             </n-button>
-            <n-button size="small" type="warning" @click="handleSell(store.currentAsset)">
-              <template #icon><n-icon :component="TrendingUpOutline" /></template>状态变更
-            </n-button>
-            <n-button size="small" type="error" @click="handleDelete(store.currentAsset?.id)">
+            <n-button size="small" type="error" ghost @click="handleDelete(store.currentAsset?.id)">
               <template #icon><n-icon :component="TrashOutline" /></template>删除
             </n-button>
           </div>
@@ -105,6 +102,7 @@
       <n-form :model="store.editForm" label-placement="left" label-width="auto">
         <n-form-item label="物品名称"><n-input v-model:value="store.editForm.name" /></n-form-item>
         <n-form-item label="分类"><n-select v-model:value="store.editForm.category" :options="categoryOptions" /></n-form-item>
+        <n-form-item label="状态"><n-select v-model:value="store.editForm.status" :options="statusOptions.filter(o => o.value !== '')" /></n-form-item>
         <n-form-item label="购入价格">
           <n-input-number v-model:value="store.editForm.buy_price" :min="0" style="width: 100%" :show-button="false">
             <template #prefix>¥</template>
@@ -115,6 +113,26 @@
         </n-form-item>
         <n-form-item label="保修截止">
           <n-date-picker v-model:formatted-value="store.editForm.warranty_date" value-format="yyyy-MM-dd" type="date" style="width: 100%" />
+        </n-form-item>
+        <n-form-item label="卖出价格" v-if="store.editForm.status === 4">
+          <n-input-number v-model:value="store.editForm.sell_price" :min="0" style="width: 100%" :show-button="false">
+            <template #prefix>¥</template>
+          </n-input-number>
+        </n-form-item>
+        <n-form-item label="卖出日期" v-if="store.editForm.status === 4">
+          <n-date-picker v-model:formatted-value="store.editForm.sell_date" value-format="yyyy-MM-dd" type="date" style="width: 100%" />
+        </n-form-item>
+        <n-form-item label="图片">
+          <div class="image-upload-area">
+            <div v-if="store.editForm.image_path" class="image-preview">
+              <img :src="store.editForm.image_path" alt="资产图片" />
+              <button class="remove-image" @click="store.editForm.image_path = ''">×</button>
+            </div>
+            <label v-else class="upload-button">
+              <input type="file" accept="image/*" @change="(e) => handleImageUpload(e, 'edit')" hidden />
+              <span>点击上传图片</span>
+            </label>
+          </div>
         </n-form-item>
         <n-form-item label="备注">
           <n-input v-model:value="store.editForm.remark" type="textarea" placeholder="添加备注信息..." :autosize="{ minRows: 2, maxRows: 4 }" />
@@ -219,6 +237,18 @@
         <n-form-item label="保修截止">
           <n-date-picker v-model:formatted-value="store.formData.warranty_date" value-format="yyyy-MM-dd" type="date" style="width: 100%" />
         </n-form-item>
+        <n-form-item label="图片">
+          <div class="image-upload-area">
+            <div v-if="store.formData.image_path" class="image-preview">
+              <img :src="store.formData.image_path" alt="资产图片" />
+              <button class="remove-image" @click="store.formData.image_path = ''">×</button>
+            </div>
+            <label v-else class="upload-button">
+              <input type="file" accept="image/*" @change="(e) => handleImageUpload(e, 'add')" hidden />
+              <span>点击上传图片</span>
+            </label>
+          </div>
+        </n-form-item>
         <n-form-item label="备注">
           <n-input v-model:value="store.formData.remark" type="textarea" placeholder="添加备注..." :autosize="{ minRows: 1, maxRows: 3 }" />
         </n-form-item>
@@ -234,7 +264,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, onMounted, onUnmounted, watch, nextTick } from "vue";
 import { useAssetStore } from "./stores/assetStore";
 import type { Asset } from "./types";
 import {
@@ -250,11 +280,17 @@ import AssetList from './components/AssetList.vue';
 import Wishlist from './components/Wishlist.vue';
 import Timeline from './components/Timeline.vue';
 import Charts from './components/Charts.vue';
+import * as echarts from 'echarts';
+import { writeFile, BaseDirectory } from '@tauri-apps/plugin-fs';
+import { appDataDir } from '@tauri-apps/api/path';
+import { convertFileSrc } from '@tauri-apps/api/core';
 
 const store = useAssetStore();
 const { message } = createDiscreteApi(["message"]);
 const isScrolled = ref(false);
 const currentTime = ref(new Date());
+const detailChartRef = ref<HTMLElement>();
+let detailChart: echarts.ECharts | null = null;
 
 const tabs = [
   { name: 'home', icon: HomeOutline },
@@ -367,10 +403,12 @@ const refreshData = async () => {
 const handleSave = async () => {
   if (!store.formData.name || !store.formData.buy_price) { message.warning("请输入名称和价格"); return; }
   try {
-    await store.dbInstance.execute(`INSERT INTO assets (name, buy_price, buy_date, warranty_date, category, status, remark) VALUES (?, ?, ?, ?, ?, 0, ?)`,
-      [store.formData.name, store.formData.buy_price, store.formData.buy_date, store.formData.warranty_date, store.formData.category, store.formData.remark || ""]);
+    await store.dbInstance.execute(
+      `INSERT INTO assets (name, buy_price, buy_date, warranty_date, category, status, remark, image_path) VALUES (?, ?, ?, ?, ?, 0, ?, ?)`,
+      [store.formData.name, store.formData.buy_price, store.formData.buy_date, store.formData.warranty_date, store.formData.category, store.formData.remark || "", store.formData.image_path || null]
+    );
     message.success("已保存");
-    store.formData = { name: "", buy_price: 0, buy_date: today, warranty_date: defaultNextYear, category: "电子产品", remark: "" };
+    store.formData = { name: "", buy_price: 0, buy_date: today, warranty_date: defaultNextYear, category: "电子产品", remark: "", image_path: "" };
     store.showAddModal = false;
     await refreshData();
   } catch (e) { message.error("保存失败"); }
@@ -379,7 +417,18 @@ const handleSave = async () => {
 const handleEdit = (item: any) => {
   if (!item) return;
   store.editingId = item.id;
-  store.editForm = { name: item.name, buy_price: item.buy_price, buy_date: item.buy_date, warranty_date: item.warranty_date || "", category: item.category, remark: item.remark || "" };
+  store.editForm = { 
+    name: item.name, 
+    buy_price: item.buy_price, 
+    buy_date: item.buy_date, 
+    warranty_date: item.warranty_date || "", 
+    category: item.category, 
+    remark: item.remark || "",
+    status: item.status,
+    sell_price: item.sell_price || 0,
+    sell_date: item.sell_date || "",
+    image_path: item.image_path || ""
+  };
   store.showDetailModal = false;
   store.showEditModal = true;
 };
@@ -387,8 +436,22 @@ const handleEdit = (item: any) => {
 const handleUpdate = async () => {
   if (!store.editForm.name || !store.editForm.buy_price) { message.warning("请输入名称和价格"); return; }
   try {
-    await store.dbInstance.execute(`UPDATE assets SET name=?, buy_price=?, buy_date=?, warranty_date=?, category=?, remark=? WHERE id=?`,
-      [store.editForm.name, store.editForm.buy_price, store.editForm.buy_date, store.editForm.warranty_date, store.editForm.category, store.editForm.remark || "", store.editingId]);
+    await store.dbInstance.execute(
+      `UPDATE assets SET name=?, buy_price=?, buy_date=?, warranty_date=?, category=?, remark=?, status=?, sell_price=?, sell_date=?, image_path=? WHERE id=?`,
+      [
+        store.editForm.name, 
+        store.editForm.buy_price, 
+        store.editForm.buy_date, 
+        store.editForm.warranty_date, 
+        store.editForm.category, 
+        store.editForm.remark || "",
+        store.editForm.status,
+        store.editForm.sell_price || null,
+        store.editForm.sell_date || null,
+        store.editForm.image_path || null,
+        store.editingId
+      ]
+    );
     message.success("已更新");
     store.showEditModal = false;
     await refreshData();
@@ -428,6 +491,117 @@ const handleDelete = async (id: number | undefined) => {
   } catch (e) { message.error("删除失败"); }
 };
 
+const handleImageUpload = async (event: Event, type: 'add' | 'edit') => {
+  const file = (event.target as HTMLInputElement).files?.[0];
+  if (!file) return;
+
+  try {
+    const arrayBuffer = await file.arrayBuffer();
+    const uint8Array = new Uint8Array(arrayBuffer);
+    const ext = file.name.split('.').pop() || 'jpg';
+    const fileName = `asset_${Date.now()}.${ext}`;
+
+    await writeFile(fileName, uint8Array, { baseDir: BaseDirectory.AppData });
+
+    const dir = await appDataDir();
+    const fullPath = `${dir}${fileName}`;
+    const assetUrl = convertFileSrc(fullPath);
+
+    if (type === 'add') {
+      store.formData.image_path = assetUrl;
+    } else {
+      store.editForm.image_path = assetUrl;
+    }
+    
+    message.success("图片上传成功");
+  } catch (e) {
+    console.error('图片上传失败:', e);
+    message.error("图片上传失败");
+  }
+};
+
+const initDetailChart = () => {
+  if (!detailChartRef.value || !store.currentAsset) return;
+  
+  if (detailChart) {
+    detailChart.dispose();
+  }
+  
+  detailChart = echarts.init(detailChartRef.value);
+  
+  const asset = store.currentAsset;
+  const buyDate = new Date(asset.buy_date);
+  const endDate = asset.status === 4 && asset.sell_date ? new Date(asset.sell_date) : new Date();
+  const totalDays = Math.floor((endDate.getTime() - buyDate.getTime()) / 86400000) + 1;
+  
+  const data = [];
+  const maxDays = Math.min(totalDays, 365);
+  
+  for (let day = 1; day <= maxDays; day++) {
+    const dailyCost = asset.buy_price / day;
+    data.push([day, dailyCost]);
+  }
+  
+  const option = {
+    grid: {
+      top: 40,
+      right: 20,
+      bottom: 50,
+      left: 60
+    },
+    tooltip: {
+      trigger: 'axis',
+      formatter: (params: any) => {
+        const day = params[0].value[0];
+        const cost = params[0].value[1];
+        return `第 ${day} 天<br/>日均成本: ¥${cost.toFixed(2)}`;
+      }
+    },
+    xAxis: {
+      type: 'value',
+      name: '持有天数',
+      nameLocation: 'middle',
+      nameGap: 30,
+      min: 1,
+      max: maxDays
+    },
+    yAxis: {
+      type: 'value',
+      name: '日均成本 (¥)',
+      nameLocation: 'middle',
+      nameGap: 45,
+      axisLabel: {
+        formatter: '¥{value}'
+      }
+    },
+    series: [{
+      type: 'line',
+      data: data,
+      smooth: true,
+      symbol: 'none',
+      lineStyle: {
+        color: '#3b6fd4',
+        width: 2
+      },
+      areaStyle: {
+        color: {
+          type: 'linear',
+          x: 0,
+          y: 0,
+          x2: 0,
+          y2: 1,
+          colorStops: [
+            { offset: 0, color: 'rgba(59, 111, 212, 0.3)' },
+            { offset: 1, color: 'rgba(59, 111, 212, 0.05)' }
+          ]
+        }
+      }
+    }]
+  };
+  
+  detailChart.setOption(option);
+};
+
 const handleSaveWishlist = async () => {
   if (!store.wishlistForm.name) { message.warning("请输入名称"); return; }
   try {
@@ -450,6 +624,14 @@ const handleUpdateWishlist = async () => {
   } catch (e) { message.error("更新失败"); }
 };
 
+watch(() => store.showDetailModal, (newVal) => {
+  if (newVal) {
+    nextTick(() => {
+      initDetailChart();
+    });
+  }
+});
+
 onMounted(async () => {
   window.addEventListener('scroll', handleScroll);
   try {
@@ -461,6 +643,9 @@ onMounted(async () => {
 
 onUnmounted(() => {
   window.removeEventListener('scroll', handleScroll);
+  if (detailChart) {
+    detailChart.dispose();
+  }
 });
 </script>
 
@@ -721,5 +906,71 @@ body {
   .nav-tab { padding: 8px 12px; }
   .brand-name { font-size: 16px; }
   .page-container { padding: 16px 12px 40px; }
+}
+
+/* 图片上传区域 */
+.image-upload-area {
+  width: 100%;
+}
+
+.image-preview {
+  position: relative;
+  width: 100%;
+  max-width: 200px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+}
+
+.image-preview img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.remove-image {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.remove-image:hover {
+  background: rgba(224, 92, 92, 0.9);
+}
+
+.upload-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100px;
+  border: 2px dashed var(--color-border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: var(--color-bg);
+}
+
+.upload-button:hover {
+  border-color: var(--color-primary);
+  background: var(--color-primary-soft);
+}
+
+.upload-button span {
+  font-size: 13px;
+  color: var(--color-text-sub);
 }
 </style>
