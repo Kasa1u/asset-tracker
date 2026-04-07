@@ -9,6 +9,7 @@ export interface Asset {
   sell_price?: number | null;
   sell_date?: string | null;
   remark?: string | null;
+  image_path?: string | null;
   created_at?: string;
   dailyCost?: number;
 }
@@ -34,9 +35,9 @@ export const STATUS_MAP: Record<number, string> = {
 };
 
 export const STATUS_COLOR_MAP: Record<number, string> = {
-  0: "#2080f0",
-  1: "#18a058",
-  2: "#909399",
-  3: "#f0a020",
-  4: "#d03050"
+  0: "#3b6fd4",
+  1: "#3da871",
+  2: "#8c9fc7",
+  3: "#d4933b",
+  4: "#e05c5c"
 };
