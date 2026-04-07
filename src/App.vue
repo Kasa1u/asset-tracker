@@ -485,12 +485,20 @@ const initDetailChart = () => {
   const data = [];
   const maxDays = totalDays;
   
-  // 只生成2的幂次序列作为数据点
+  // 生成2的幂次序列 + 最后一天作为数据点
   const categories: string[] = [];
   for (let power = 0; Math.pow(2, power) <= maxDays; power++) {
     const day = Math.pow(2, power);
     categories.push(day.toString());
     const dailyCost = asset.buy_price / day;
+    data.push(dailyCost);
+  }
+  
+  // 如果最后一天不是2的幂次，添加最后一天
+  const lastPowerDay = Math.pow(2, Math.floor(Math.log2(maxDays)));
+  if (lastPowerDay !== maxDays) {
+    categories.push(maxDays.toString());
+    const dailyCost = asset.buy_price / maxDays;
     data.push(dailyCost);
   }
   
